@@ -1,6 +1,7 @@
 #ifndef STACK_HPP
 #define STACK_HPP
 
+#include <stdexcept>
 #include "list.hpp"
 
 namespace samarin {
@@ -8,9 +9,35 @@ namespace samarin {
   template< class T >
   class Stack {
   public:
-    void push(const T& rhs);
-    T drop();
-    bool empty() const;
+    bool empty() const
+    {
+      return data_.empty();
+    }
+
+    T& top()
+    {
+      return data_.front();
+    }
+
+    const T& top() const
+    {
+      return data_.front();
+    }
+
+    void push(const T& rhs)
+    {
+      data_.push_front(rhs);
+    }
+
+    T drop()
+    {
+      if (data_.empty()) {
+        throw std::logic_error("stack is empty");
+      }
+      T value = data_.front();
+      data_.pop_front();
+      return value;
+    }
 
   private:
     List< T > data_;
