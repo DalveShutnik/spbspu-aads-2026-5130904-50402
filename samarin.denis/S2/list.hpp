@@ -6,10 +6,23 @@
 namespace samarin {
 
   namespace detail {
+    struct NodeBase {
+      NodeBase * next;
+
+      explicit NodeBase(NodeBase * n):
+        next(n)
+      {}
+    };
+
     template< class T >
-    struct node_t {
+    struct Node: NodeBase {
       T value;
-      node_t< T > * next;
+
+      template< class... Args >
+      Node(NodeBase * n, Args&&... args):
+        NodeBase(n),
+        value(std::forward< Args >(args)...)
+      {}
     };
   }
 
@@ -21,12 +34,12 @@ namespace samarin {
   public:
     T& operator*() const
     {
-      return node_->value;
+      return static_cast< detail::Node< T > * >(node_)->value;
     }
 
     T* operator->() const
     {
-      return &node_->value;
+      return &static_cast< detail::Node< T > * >(node_)->value;
     }
 
     LIter< T >& operator++()
@@ -55,13 +68,13 @@ namespace samarin {
   private:
     friend class List< T >;
     friend class LCIter< T >;
-    detail::node_t< T > * node_;
+    detail::NodeBase * node_;
 
     LIter():
       node_(nullptr)
     {}
 
-    explicit LIter(detail::node_t< T > * n):
+    explicit LIter(detail::NodeBase * n):
       node_(n)
     {}
   };
@@ -79,12 +92,12 @@ namespace samarin {
 
     const T& operator*() const
     {
-      return node_->value;
+      return static_cast< const detail::Node< T > * >(node_)->value;
     }
 
     const T* operator->() const
     {
-      return &node_->value;
+      return &static_cast< const detail::Node< T > * >(node_)->value;
     }
 
     LCIter< T >& operator++()
@@ -112,9 +125,9 @@ namespace samarin {
 
   private:
     friend class List< T >;
-    const detail::node_t< T > * node_;
+    const detail::NodeBase * node_;
 
-    explicit LCIter(const detail::node_t< T > * n):
+    explicit LCIter(const detail::NodeBase * n):
       node_(n)
     {}
   };
@@ -123,15 +136,12 @@ namespace samarin {
   class List {
   public:
     List():
-      head_(new detail::node_t< T >)
-    {
-      head_->next = nullptr;
-    }
+      head_(new detail::NodeBase(nullptr))
+    {}
 
     List(const List< T >& other):
-      head_(new detail::node_t< T >)
+      head_(new detail::NodeBase(nullptr))
     {
-      head_->next = nullptr;
       try {
         LIter< T > tail = before_begin();
         for (LCIter< T > it = other.cbegin(); it != other.cend(); ++it) {
@@ -180,36 +190,25 @@ namespace samarin {
 
     void push_front(const T& v)
     {
-      detail::node_t< T > * node = new detail::node_t< T >;
-      node->value = v;
-      node->next = head_->next;
-      head_->next = node;
+      emplaceFront(v);
     }
 
     template< class... Args >
     void emplaceFront(Args&&... args)
     {
-      detail::node_t< T > * node
-        = new detail::node_t< T >{ T(std::forward< Args >(args)...), head_->next };
-      head_->next = node;
+      head_->next = new detail::Node< T >(head_->next, std::forward< Args >(args)...);
     }
 
     LIter< T > insert_after(LIter< T > pos, const T& v)
     {
-      detail::node_t< T > * node = new detail::node_t< T >;
-      node->value = v;
-      node->next = pos.node_->next;
-      pos.node_->next = node;
-      return LIter< T >(node);
+      return emplaceAfter(pos, v);
     }
 
     template< class... Args >
     LIter< T > emplaceAfter(LIter< T > pos, Args&&... args)
     {
-      detail::node_t< T > * node
-        = new detail::node_t< T >{ T(std::forward< Args >(args)...), pos.node_->next };
-      pos.node_->next = node;
-      return LIter< T >(node);
+      pos.node_->next = new detail::Node< T >(pos.node_->next, std::forward< Args >(args)...);
+      return LIter< T >(pos.node_->next);
     }
 
     LIter< T > before_begin()
@@ -219,19 +218,19 @@ namespace samarin {
 
     T& front()
     {
-      return head_->next->value;
+      return static_cast< detail::Node< T > * >(head_->next)->value;
     }
 
     const T& front() const
     {
-      return head_->next->value;
+      return static_cast< const detail::Node< T > * >(head_->next)->value;
     }
 
     void pop_front()
     {
-      detail::node_t< T > * temp = head_->next;
+      detail::NodeBase * temp = head_->next;
       head_->next = temp->next;
-      delete temp;
+      delete static_cast< detail::Node< T > * >(temp);
     }
 
     bool empty() const
@@ -277,16 +276,16 @@ namespace samarin {
     }
 
   private:
-    detail::node_t< T > * head_;
+    detail::NodeBase * head_;
   };
 
   template< class T >
   void List< T >::clear()
   {
-    detail::node_t< T > * temp = head_->next;
+    detail::NodeBase * temp = head_->next;
     while (temp != nullptr) {
-      detail::node_t< T > * next = temp->next;
-      delete temp;
+      detail::NodeBase * next = temp->next;
+      delete static_cast< detail::Node< T > * >(temp);
       temp = next;
     }
     head_->next = nullptr;
