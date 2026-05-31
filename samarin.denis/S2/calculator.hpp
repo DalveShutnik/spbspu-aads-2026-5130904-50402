@@ -7,6 +7,7 @@
 namespace samarin {
 
   Queue< std::string > convertToPostfix(Queue< std::string > infix);
+  long long calculateExpression(const std::string& line);
 
 }
 
