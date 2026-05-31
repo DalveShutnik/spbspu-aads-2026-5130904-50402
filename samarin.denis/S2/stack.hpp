@@ -2,6 +2,7 @@
 #define STACK_HPP
 
 #include <stdexcept>
+#include <utility>
 #include "list.hpp"
 
 namespace samarin {
@@ -27,6 +28,12 @@ namespace samarin {
     void push(const T& rhs)
     {
       data_.push_front(rhs);
+    }
+
+    template< class... Args >
+    void emplace(Args&&... args)
+    {
+      data_.emplaceFront(std::forward< Args >(args)...);
     }
 
     T drop()

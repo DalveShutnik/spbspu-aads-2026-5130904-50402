@@ -186,11 +186,28 @@ namespace samarin {
       head_->next = node;
     }
 
+    template< class... Args >
+    void emplaceFront(Args&&... args)
+    {
+      detail::node_t< T > * node
+        = new detail::node_t< T >{ T(std::forward< Args >(args)...), head_->next };
+      head_->next = node;
+    }
+
     LIter< T > insert_after(LIter< T > pos, const T& v)
     {
       detail::node_t< T > * node = new detail::node_t< T >;
       node->value = v;
       node->next = pos.node_->next;
+      pos.node_->next = node;
+      return LIter< T >(node);
+    }
+
+    template< class... Args >
+    LIter< T > emplaceAfter(LIter< T > pos, Args&&... args)
+    {
+      detail::node_t< T > * node
+        = new detail::node_t< T >{ T(std::forward< Args >(args)...), pos.node_->next };
       pos.node_->next = node;
       return LIter< T >(node);
     }

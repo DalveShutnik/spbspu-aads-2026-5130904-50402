@@ -1,7 +1,9 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
+#include <memory>
 #include <stdexcept>
+#include <utility>
 #include "list.hpp"
 
 namespace samarin {
@@ -55,6 +57,12 @@ namespace samarin {
     void push(const T& rhs)
     {
       tail_ = data_.insert_after(tail_, rhs);
+    }
+
+    template< class... Args >
+    void emplace(Args&&... args)
+    {
+      tail_ = data_.emplaceAfter(tail_, std::forward< Args >(args)...);
     }
 
     T drop()
