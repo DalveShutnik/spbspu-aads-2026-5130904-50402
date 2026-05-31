@@ -54,12 +54,7 @@ namespace samarin {
 
     void push(const T& rhs)
     {
-      if (data_.empty()) {
-        data_.push_front(rhs);
-        tail_ = data_.begin();
-      } else {
-        tail_ = data_.insert_after(tail_, rhs);
-      }
+      tail_ = data_.insert_after(tail_, rhs);
     }
 
     T drop()
