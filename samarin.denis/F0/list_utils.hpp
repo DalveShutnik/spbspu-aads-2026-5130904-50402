@@ -34,6 +34,22 @@ namespace samarin {
   }
 
   template< class T >
+  const T& listAt(const List< T >& list, std::size_t index)
+  {
+    LCIter< T > it = list.cbegin();
+    for (std::size_t i = 0; i < index; ++i) {
+      if (it == list.cend()) {
+        throw std::out_of_range("index out of range");
+      }
+      ++it;
+    }
+    if (it == list.cend()) {
+      throw std::out_of_range("index out of range");
+    }
+    return *it;
+  }
+
+  template< class T >
   LIter< T > iterBefore(List< T >& list, std::size_t index)
   {
     LIter< T > prev = list.before_begin();
