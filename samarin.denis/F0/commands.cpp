@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <fstream>
 #include <istream>
+#include <limits>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -11,6 +12,7 @@
 #include "cuckoo_table.hpp"
 #include "hashers.hpp"
 #include "list_utils.hpp"
+#include "stack.hpp"
 #include "text.hpp"
 #include "text_index.hpp"
 #include "text_ops.hpp"
@@ -289,6 +291,154 @@ namespace samarin {
       index.build(text);
     }
 
+    struct findopts_t {
+      std::size_t limit;
+      bool fromEnd;
+      int edge;
+      std::size_t context;
+    };
+
+    bool startsWith(const std::string& text, const std::string& prefix)
+    {
+      return text.size() >= prefix.size() && text.compare(0, prefix.size(), prefix) == 0;
+    }
+
+    std::size_t parseSize(const std::string& text)
+    {
+      std::istringstream stream(text);
+      std::size_t value = 0;
+      if (!(stream >> value) || !stream.eof()) {
+        throw std::logic_error("bad number");
+      }
+      return value;
+    }
+
+    void parseFlag(const std::string& flag, findopts_t& options)
+    {
+      if (startsWith(flag, "--limit=")) {
+        options.limit = parseSize(flag.substr(std::string("--limit=").size()));
+      } else if (startsWith(flag, "--context=")) {
+        options.context = parseSize(flag.substr(std::string("--context=").size()));
+      } else if (startsWith(flag, "--from=")) {
+        const std::string value = flag.substr(std::string("--from=").size());
+        if (value == "start") {
+          options.fromEnd = false;
+        } else if (value == "end") {
+          options.fromEnd = true;
+        } else {
+          throw std::logic_error("bad from");
+        }
+      } else if (startsWith(flag, "--edge=")) {
+        const std::string value = flag.substr(std::string("--edge=").size());
+        if (value == "left") {
+          options.edge = 1;
+        } else if (value == "right") {
+          options.edge = 2;
+        } else {
+          throw std::logic_error("bad edge");
+        }
+      } else {
+        throw std::logic_error("unknown flag");
+      }
+    }
+
+    void printContext(std::ostream& out, const Text& text, const position_t& pos, const findopts_t& options)
+    {
+      const Line& line = listAt(text, pos.line);
+      const std::size_t width = listSize(line);
+      std::size_t lo = pos.word;
+      std::size_t hi = pos.word;
+      if (options.edge != 2) {
+        lo = (pos.word > options.context) ? (pos.word - options.context) : 0;
+      }
+      if (options.edge != 1) {
+        hi = pos.word + options.context;
+        if (hi >= width) {
+          hi = width - 1;
+        }
+      }
+      out << (pos.line + 1) << " " << (pos.word + 1) << ":";
+      for (std::size_t col = lo; col <= hi; ++col) {
+        const std::string& word = listAt(line, col);
+        out << " ";
+        if (col == pos.word) {
+          out << "[" << word << "]";
+        } else {
+          out << word;
+        }
+      }
+      out << "\n";
+    }
+
+    void cmdFind(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      in >> id >> word;
+      if (!in) {
+        throw std::logic_error("missing arguments");
+      }
+      findopts_t options = { std::numeric_limits< std::size_t >::max(), false, 0, 0 };
+      std::string flag;
+      while (in >> flag) {
+        parseFlag(flag, options);
+      }
+      const TextIndex& index = requireDoc(docs, id);
+      if (!index.has(word)) {
+        out << "<EMPTY>\n";
+        return;
+      }
+      List< position_t > ordered;
+      for (LCIter< position_t > it = index.positions(word).cbegin(); it != index.positions(word).cend(); ++it) {
+        sortedInsert(ordered, *it);
+      }
+      List< position_t > sequence;
+      if (options.fromEnd) {
+        Stack< position_t > stack;
+        for (LCIter< position_t > it = ordered.cbegin(); it != ordered.cend(); ++it) {
+          stack.push(*it);
+        }
+        LIter< position_t > tail = sequence.before_begin();
+        while (!stack.empty()) {
+          tail = sequence.insert_after(tail, stack.drop());
+        }
+      } else {
+        sequence = ordered;
+      }
+      const Text text = index.restore();
+      std::size_t shown = 0;
+      for (LCIter< position_t > it = sequence.cbegin(); it != sequence.cend() && shown < options.limit; ++it) {
+        printContext(out, text, *it, options);
+        ++shown;
+      }
+    }
+
+    void cmdDumpIndex(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      in >> id;
+      const TextIndex& index = requireDoc(docs, id);
+      List< std::string > words;
+      for (PostingsTable::const_iterator it = index.postings().cbegin(); it != index.postings().cend(); ++it) {
+        sortedInsert(words, it->first);
+      }
+      if (words.empty()) {
+        out << "<EMPTY>\n";
+        return;
+      }
+      for (LCIter< std::string > word = words.cbegin(); word != words.cend(); ++word) {
+        out << *word << ":";
+        List< position_t > positions;
+        for (LCIter< position_t > p = index.positions(*word).cbegin(); p != index.positions(*word).cend(); ++p) {
+          sortedInsert(positions, *p);
+        }
+        for (LCIter< position_t > p = positions.cbegin(); p != positions.cend(); ++p) {
+          out << " (" << (p->line + 1) << "," << (p->word + 1) << ")";
+        }
+        out << "\n";
+      }
+    }
+
     CommandTable makeCommands()
     {
       CommandTable commands;
@@ -311,6 +461,8 @@ namespace samarin {
       commands.add("reverse-lines", &cmdReverseLines);
       commands.add("reverse-words", &cmdReverseWords);
       commands.add("transpose", &cmdTranspose);
+      commands.add("find", &cmdFind);
+      commands.add("dump-index", &cmdDumpIndex);
       return commands;
     }
   }
