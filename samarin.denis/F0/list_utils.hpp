@@ -2,6 +2,7 @@
 #define LIST_UTILS_HPP
 
 #include <cstddef>
+#include <stdexcept>
 #include <list.hpp>
 
 namespace samarin {
@@ -14,6 +15,37 @@ namespace samarin {
       ++count;
     }
     return count;
+  }
+
+  template< class T >
+  T& listAt(List< T >& list, std::size_t index)
+  {
+    LIter< T > it = list.begin();
+    for (std::size_t i = 0; i < index; ++i) {
+      if (it == list.end()) {
+        throw std::out_of_range("index out of range");
+      }
+      ++it;
+    }
+    if (it == list.end()) {
+      throw std::out_of_range("index out of range");
+    }
+    return *it;
+  }
+
+  template< class T >
+  LIter< T > iterBefore(List< T >& list, std::size_t index)
+  {
+    LIter< T > prev = list.before_begin();
+    for (std::size_t i = 0; i < index; ++i) {
+      LIter< T > next = prev;
+      ++next;
+      if (next == list.end()) {
+        throw std::out_of_range("index out of range");
+      }
+      prev = next;
+    }
+    return prev;
   }
 
   template< class T >
