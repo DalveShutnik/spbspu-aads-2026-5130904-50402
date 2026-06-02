@@ -195,6 +195,16 @@ namespace samarin {
       return LIter< T >(node);
     }
 
+    LIter< T > erase_after(LIter< T > pos)
+    {
+      detail::node_t< T > * victim = pos.node_->next;
+      if (victim != nullptr) {
+        pos.node_->next = victim->next;
+        delete victim;
+      }
+      return LIter< T >(pos.node_->next);
+    }
+
     LIter< T > before_begin()
     {
       return LIter< T >(head_);
