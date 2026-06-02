@@ -138,6 +138,95 @@ namespace samarin {
       out << "find dump-index\n";
     }
 
+    using UnaryOp = Text (*)(const Text&);
+    using BinaryOp = Text (*)(const Text&, const Text&);
+    using RepeatOp = Text (*)(const Text&, std::size_t);
+
+    void runUnary(std::istream& in, Documents& docs, UnaryOp op)
+    {
+      std::string id;
+      std::string newId;
+      in >> id >> newId;
+      if (!in) {
+        throw std::logic_error("missing arguments");
+      }
+      requireAbsent(docs, newId);
+      storeText(docs, newId, op(requireDoc(docs, id).restore()));
+    }
+
+    void runBinary(std::istream& in, Documents& docs, BinaryOp op)
+    {
+      std::string first;
+      std::string second;
+      std::string newId;
+      in >> first >> second >> newId;
+      if (!in) {
+        throw std::logic_error("missing arguments");
+      }
+      requireAbsent(docs, newId);
+      const Text left = requireDoc(docs, first).restore();
+      const Text right = requireDoc(docs, second).restore();
+      storeText(docs, newId, op(left, right));
+    }
+
+    void runRepeat(std::istream& in, Documents& docs, RepeatOp op)
+    {
+      std::string id;
+      std::size_t times = 0;
+      std::string newId;
+      in >> id >> times >> newId;
+      if (!in) {
+        throw std::logic_error("missing arguments");
+      }
+      requireAbsent(docs, newId);
+      storeText(docs, newId, op(requireDoc(docs, id).restore(), times));
+    }
+
+    void cmdConcat(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runBinary(in, docs, &concat);
+    }
+
+    void cmdConcatLines(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runBinary(in, docs, &concatLines);
+    }
+
+    void cmdInterleaveLines(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runBinary(in, docs, &interleaveLines);
+    }
+
+    void cmdInterleaveWords(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runBinary(in, docs, &interleaveWords);
+    }
+
+    void cmdRepeatVertical(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runRepeat(in, docs, &repeatVertical);
+    }
+
+    void cmdRepeatHorizontal(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runRepeat(in, docs, &repeatHorizontal);
+    }
+
+    void cmdReverseLines(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runUnary(in, docs, &reverseLines);
+    }
+
+    void cmdReverseWords(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runUnary(in, docs, &reverseWords);
+    }
+
+    void cmdTranspose(std::istream& in, std::ostream&, Documents& docs)
+    {
+      runUnary(in, docs, &transpose);
+    }
+
     void cmdReplace(std::istream& in, std::ostream&, Documents& docs)
     {
       std::string id;
@@ -213,6 +302,15 @@ namespace samarin {
       commands.add("swap", &cmdSwap);
       commands.add("insert-line", &cmdInsertLine);
       commands.add("remove-line", &cmdRemoveLine);
+      commands.add("concat", &cmdConcat);
+      commands.add("concat-lines", &cmdConcatLines);
+      commands.add("repeat-vertical", &cmdRepeatVertical);
+      commands.add("repeat-horizontal", &cmdRepeatHorizontal);
+      commands.add("interleave-lines", &cmdInterleaveLines);
+      commands.add("interleave-words", &cmdInterleaveWords);
+      commands.add("reverse-lines", &cmdReverseLines);
+      commands.add("reverse-words", &cmdReverseWords);
+      commands.add("transpose", &cmdTranspose);
       return commands;
     }
   }
