@@ -291,10 +291,16 @@ namespace samarin {
       index.build(text);
     }
 
+    enum class Edge {
+      both,
+      left,
+      right
+    };
+
     struct findopts_t {
       std::size_t limit;
       bool fromEnd;
-      int edge;
+      Edge edge;
       std::size_t context;
     };
 
@@ -331,9 +337,9 @@ namespace samarin {
       } else if (startsWith(flag, "--edge=")) {
         const std::string value = flag.substr(std::string("--edge=").size());
         if (value == "left") {
-          options.edge = 1;
+          options.edge = Edge::left;
         } else if (value == "right") {
-          options.edge = 2;
+          options.edge = Edge::right;
         } else {
           throw std::logic_error("bad edge");
         }
@@ -348,10 +354,10 @@ namespace samarin {
       const std::size_t width = listSize(line);
       std::size_t lo = pos.word;
       std::size_t hi = pos.word;
-      if (options.edge != 2) {
+      if (options.edge != Edge::right) {
         lo = (pos.word > options.context) ? (pos.word - options.context) : 0;
       }
-      if (options.edge != 1) {
+      if (options.edge != Edge::left) {
         hi = pos.word + options.context;
         if (hi >= width) {
           hi = width - 1;
@@ -378,7 +384,7 @@ namespace samarin {
       if (!in) {
         throw std::logic_error("missing arguments");
       }
-      findopts_t options = { std::numeric_limits< std::size_t >::max(), false, 0, 0 };
+      findopts_t options = { std::numeric_limits< std::size_t >::max(), false, Edge::both, 0 };
       std::string flag;
       while (in >> flag) {
         parseFlag(flag, options);
