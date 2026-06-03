@@ -298,6 +298,11 @@ namespace samarin {
       return detail::cuckooMix(hash_(key)) % capacity_;
     }
 
+    bool wouldOverload(std::size_t extra) const
+    {
+      return (size_ + extra) * load_den > capacity_ * load_num;
+    }
+
     std::size_t maxKicks() const
     {
       std::size_t bound = 1;
@@ -344,7 +349,7 @@ namespace samarin {
         slots_[found].data.second = value;
         return;
       }
-      if ((size_ + 1) * load_den > capacity_ * load_num) {
+      if (wouldOverload(1)) {
         rehash(capacity_ * growth);
       }
       std::pair< Key, Value > cur(key, value);
