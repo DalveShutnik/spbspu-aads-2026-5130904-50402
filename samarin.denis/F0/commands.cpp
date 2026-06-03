@@ -74,9 +74,11 @@ namespace samarin {
     void printKeys(std::ostream& out, const Documents& docs)
     {
       List< std::string > names;
+      LIter< std::string > tail = names.before_begin();
       for (Documents::const_iterator it = docs.cbegin(); it != docs.cend(); ++it) {
-        sortedInsert(names, it->first);
+        tail = names.insert_after(tail, it->first);
       }
+      listSort(names);
       if (names.empty()) {
         out << "<EMPTY>\n";
         return;
