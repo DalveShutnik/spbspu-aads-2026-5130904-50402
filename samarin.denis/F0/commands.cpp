@@ -383,10 +383,8 @@ namespace samarin {
         out << "<EMPTY>\n";
         return;
       }
-      List< position_t > ordered;
-      for (LCIter< position_t > it = index.positions(word).cbegin(); it != index.positions(word).cend(); ++it) {
-        sortedInsert(ordered, *it);
-      }
+      List< position_t > ordered = index.positions(word);
+      listSort(ordered);
       List< position_t > sequence;
       if (options.fromEnd) {
         Stack< position_t > stack;
