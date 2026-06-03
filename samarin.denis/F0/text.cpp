@@ -11,6 +11,9 @@ samarin::Text samarin::parseText(std::istream& in)
   LIter< Line > lineTail = text.before_begin();
   std::string raw;
   while (std::getline(in, raw)) {
+    if (!raw.empty() && raw.back() == '\r') {
+      raw.pop_back();
+    }
     Line words;
     LIter< std::string > wordTail = words.before_begin();
     std::istringstream stream(raw);
