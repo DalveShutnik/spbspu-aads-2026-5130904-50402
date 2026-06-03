@@ -115,18 +115,6 @@ namespace samarin {
     list = mergeSorted(left, right);
   }
 
-  template< class T >
-  void sortedInsert(List< T >& list, const T& value)
-  {
-    LIter< T > prev = list.before_begin();
-    LIter< T > cur = list.begin();
-    while (cur != list.end() && *cur < value) {
-      prev = cur;
-      ++cur;
-    }
-    list.insert_after(prev, value);
-  }
-
 }
 
 #endif
