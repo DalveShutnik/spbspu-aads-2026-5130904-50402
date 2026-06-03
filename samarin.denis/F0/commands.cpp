@@ -414,19 +414,19 @@ namespace samarin {
       in >> id;
       const TextIndex& index = requireDoc(docs, id);
       List< std::string > words;
+      LIter< std::string > wordTail = words.before_begin();
       for (PostingsTable::const_iterator it = index.postings().cbegin(); it != index.postings().cend(); ++it) {
-        sortedInsert(words, it->first);
+        wordTail = words.insert_after(wordTail, it->first);
       }
+      listSort(words);
       if (words.empty()) {
         out << "<EMPTY>\n";
         return;
       }
       for (LCIter< std::string > word = words.cbegin(); word != words.cend(); ++word) {
         out << *word << ":";
-        List< position_t > positions;
-        for (LCIter< position_t > p = index.positions(*word).cbegin(); p != index.positions(*word).cend(); ++p) {
-          sortedInsert(positions, *p);
-        }
+        List< position_t > positions = index.positions(*word);
+        listSort(positions);
         for (LCIter< position_t > p = positions.cbegin(); p != positions.cend(); ++p) {
           out << " (" << (p->line + 1) << "," << (p->word + 1) << ")";
         }
