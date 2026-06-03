@@ -45,6 +45,13 @@ namespace samarin {
       docs.add(id, index);
     }
 
+    void requireStream(const std::istream& in)
+    {
+      if (!in) {
+        throw std::logic_error("missing arguments");
+      }
+    }
+
     std::size_t toIndex(std::size_t oneBased)
     {
       if (oneBased == 0) {
@@ -84,9 +91,7 @@ namespace samarin {
       std::string file;
       std::string id;
       in >> file >> id;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       requireAbsent(docs, id);
       std::ifstream source(file.c_str());
       if (!source.is_open()) {
@@ -100,9 +105,7 @@ namespace samarin {
       std::string id;
       std::string file;
       in >> id >> file;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       const TextIndex& index = requireDoc(docs, id);
       std::ofstream sink(file.c_str());
       if (!sink.is_open()) {
@@ -149,9 +152,7 @@ namespace samarin {
       std::string id;
       std::string newId;
       in >> id >> newId;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       requireAbsent(docs, newId);
       storeText(docs, newId, op(requireDoc(docs, id).restore()));
     }
@@ -162,9 +163,7 @@ namespace samarin {
       std::string second;
       std::string newId;
       in >> first >> second >> newId;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       requireAbsent(docs, newId);
       const Text left = requireDoc(docs, first).restore();
       const Text right = requireDoc(docs, second).restore();
@@ -177,9 +176,7 @@ namespace samarin {
       std::size_t times = 0;
       std::string newId;
       in >> id >> times >> newId;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       requireAbsent(docs, newId);
       storeText(docs, newId, op(requireDoc(docs, id).restore(), times));
     }
@@ -236,9 +233,7 @@ namespace samarin {
       std::size_t word = 0;
       std::string value;
       in >> id >> line >> word >> value;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       TextIndex& index = requireDoc(docs, id);
       Text text = index.restore();
       replaceWord(text, toIndex(line), toIndex(word), value);
@@ -253,9 +248,7 @@ namespace samarin {
       std::size_t line2 = 0;
       std::size_t word2 = 0;
       in >> id >> line1 >> word1 >> line2 >> word2;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       TextIndex& index = requireDoc(docs, id);
       Text text = index.restore();
       swapWords(text, toIndex(line1), toIndex(word1), toIndex(line2), toIndex(word2));
@@ -267,9 +260,7 @@ namespace samarin {
       std::string id;
       std::size_t pos = 0;
       in >> id >> pos;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       TextIndex& index = requireDoc(docs, id);
       const Line line = readLine(in);
       Text text = index.restore();
@@ -282,9 +273,7 @@ namespace samarin {
       std::string id;
       std::size_t pos = 0;
       in >> id >> pos;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       TextIndex& index = requireDoc(docs, id);
       Text text = index.restore();
       removeLine(text, toIndex(pos));
@@ -381,9 +370,7 @@ namespace samarin {
       std::string id;
       std::string word;
       in >> id >> word;
-      if (!in) {
-        throw std::logic_error("missing arguments");
-      }
+      requireStream(in);
       findopts_t options = { std::numeric_limits< std::size_t >::max(), false, Edge::both, 0 };
       std::string flag;
       while (in >> flag) {
