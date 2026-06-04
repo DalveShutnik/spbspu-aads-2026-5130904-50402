@@ -303,6 +303,12 @@ namespace samarin {
       return (size_ + extra) * load_den > capacity_ * load_num;
     }
 
+    std::size_t alternateHome(const Key& key, std::size_t current) const
+    {
+      const std::size_t first = home1(key);
+      return (current == first) ? home2(key) : first;
+    }
+
     std::size_t maxKicks() const
     {
       std::size_t bound = 1;
@@ -336,8 +342,7 @@ namespace samarin {
           return true;
         }
         std::swap(cur, slots_[pos].data);
-        const std::size_t alt = home1(cur.first);
-        pos = (pos == alt) ? home2(cur.first) : alt;
+        pos = alternateHome(cur.first, pos);
       }
       return false;
     }
