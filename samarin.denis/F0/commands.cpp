@@ -339,6 +339,25 @@ namespace samarin {
       }
     }
 
+    List< position_t > collectSequence(const PostingList& source, bool fromEnd)
+    {
+      List< position_t > ordered = source;
+      listSort(ordered);
+      if (!fromEnd) {
+        return ordered;
+      }
+      List< position_t > reversed;
+      Stack< position_t > stack;
+      for (LCIter< position_t > it = ordered.cbegin(); it != ordered.cend(); ++it) {
+        stack.push(*it);
+      }
+      LIter< position_t > tail = reversed.before_begin();
+      while (!stack.empty()) {
+        tail = reversed.insert_after(tail, stack.drop());
+      }
+      return reversed;
+    }
+
     void printContext(std::ostream& out, const Text& text, const position_t& pos, const findopts_t& options)
     {
       const Line& line = listAt(text, pos.line);
@@ -383,21 +402,7 @@ namespace samarin {
         out << "<EMPTY>\n";
         return;
       }
-      List< position_t > ordered = index.positions(word);
-      listSort(ordered);
-      List< position_t > sequence;
-      if (options.fromEnd) {
-        Stack< position_t > stack;
-        for (LCIter< position_t > it = ordered.cbegin(); it != ordered.cend(); ++it) {
-          stack.push(*it);
-        }
-        LIter< position_t > tail = sequence.before_begin();
-        while (!stack.empty()) {
-          tail = sequence.insert_after(tail, stack.drop());
-        }
-      } else {
-        sequence = ordered;
-      }
+      const List< position_t > sequence = collectSequence(index.positions(word), options.fromEnd);
       const Text text = index.restore();
       std::size_t shown = 0;
       for (LCIter< position_t > it = sequence.cbegin(); it != sequence.cend() && shown < options.limit; ++it) {
