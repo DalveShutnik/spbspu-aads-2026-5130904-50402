@@ -123,7 +123,6 @@ namespace samarin {
     {
       std::string id;
       in >> id;
-      requireDoc(docs, id);
       docs.drop(id);
     }
 
