@@ -40,9 +40,7 @@ namespace samarin {
 
     void storeText(Documents& docs, const std::string& id, const Text& text)
     {
-      TextIndex index;
-      index.build(text);
-      docs.add(id, index);
+      docs[id].build(text);
     }
 
     void requireStream(const std::istream& in)
