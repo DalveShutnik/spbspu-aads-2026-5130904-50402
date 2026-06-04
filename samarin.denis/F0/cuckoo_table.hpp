@@ -320,11 +320,12 @@ namespace samarin {
 
     std::size_t locate(const Key& key) const
     {
-      const std::size_t first = home1(key);
+      const std::size_t base = hash_(key);
+      const std::size_t first = base % capacity_;
       if (slots_[first].occupied && equal_(slots_[first].data.first, key)) {
         return first;
       }
-      const std::size_t second = home2(key);
+      const std::size_t second = detail::cuckooMix(base) % capacity_;
       if (slots_[second].occupied && equal_(slots_[second].data.first, key)) {
         return second;
       }
