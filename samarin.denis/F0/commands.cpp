@@ -226,6 +226,15 @@ namespace samarin {
       runUnary(in, docs, &transpose);
     }
 
+    template< class Mutator >
+    void editDoc(Documents& docs, const std::string& id, Mutator mutate)
+    {
+      TextIndex& index = requireDoc(docs, id);
+      Text text = index.restore();
+      mutate(text);
+      index.build(text);
+    }
+
     void cmdReplace(std::istream& in, std::ostream&, Documents& docs)
     {
       std::string id;
@@ -234,10 +243,10 @@ namespace samarin {
       std::string value;
       in >> id >> line >> word >> value;
       requireStream(in);
-      TextIndex& index = requireDoc(docs, id);
-      Text text = index.restore();
-      replaceWord(text, toIndex(line), toIndex(word), value);
-      index.build(text);
+      editDoc(docs, id, [&](Text& text)
+      {
+        replaceWord(text, toIndex(line), toIndex(word), value);
+      });
     }
 
     void cmdSwap(std::istream& in, std::ostream&, Documents& docs)
@@ -249,10 +258,10 @@ namespace samarin {
       std::size_t word2 = 0;
       in >> id >> line1 >> word1 >> line2 >> word2;
       requireStream(in);
-      TextIndex& index = requireDoc(docs, id);
-      Text text = index.restore();
-      swapWords(text, toIndex(line1), toIndex(word1), toIndex(line2), toIndex(word2));
-      index.build(text);
+      editDoc(docs, id, [&](Text& text)
+      {
+        swapWords(text, toIndex(line1), toIndex(word1), toIndex(line2), toIndex(word2));
+      });
     }
 
     void cmdInsertLine(std::istream& in, std::ostream&, Documents& docs)
@@ -261,11 +270,11 @@ namespace samarin {
       std::size_t pos = 0;
       in >> id >> pos;
       requireStream(in);
-      TextIndex& index = requireDoc(docs, id);
       const Line line = readLine(in);
-      Text text = index.restore();
-      insertLine(text, toIndex(pos), line);
-      index.build(text);
+      editDoc(docs, id, [&](Text& text)
+      {
+        insertLine(text, toIndex(pos), line);
+      });
     }
 
     void cmdRemoveLine(std::istream& in, std::ostream&, Documents& docs)
@@ -274,10 +283,10 @@ namespace samarin {
       std::size_t pos = 0;
       in >> id >> pos;
       requireStream(in);
-      TextIndex& index = requireDoc(docs, id);
-      Text text = index.restore();
-      removeLine(text, toIndex(pos));
-      index.build(text);
+      editDoc(docs, id, [&](Text& text)
+      {
+        removeLine(text, toIndex(pos));
+      });
     }
 
     enum class Edge {
