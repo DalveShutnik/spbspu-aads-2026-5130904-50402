@@ -318,15 +318,20 @@ namespace samarin {
       return bound * 4 + 4;
     }
 
+    bool slotMatches(std::size_t index, const Key& key) const
+    {
+      return slots_[index].occupied && equal_(slots_[index].data.first, key);
+    }
+
     std::size_t locate(const Key& key) const
     {
       const std::size_t base = hash_(key);
       const std::size_t first = base % capacity_;
-      if (slots_[first].occupied && equal_(slots_[first].data.first, key)) {
+      if (slotMatches(first, key)) {
         return first;
       }
       const std::size_t second = detail::cuckooMix(base) % capacity_;
-      if (slots_[second].occupied && equal_(slots_[second].data.first, key)) {
+      if (slotMatches(second, key)) {
         return second;
       }
       return capacity_;
