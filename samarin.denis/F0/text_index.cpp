@@ -41,13 +41,18 @@ void samarin::TextIndex::build(const Text& text)
   lineLengths_ = std::move(freshLengths);
 }
 
-samarin::Text samarin::TextIndex::restore() const
+std::size_t samarin::TextIndex::wordCount() const
 {
   std::size_t total = 0;
   for (LCIter< std::size_t > len = lineLengths_.cbegin(); len != lineLengths_.cend(); ++len) {
     total += *len;
   }
-  ForwardTable forward(total * 2 + 1);
+  return total;
+}
+
+samarin::Text samarin::TextIndex::restore() const
+{
+  ForwardTable forward(wordCount() * 2 + 1);
   for (PostingsTable::const_iterator entry = postings_.cbegin(); entry != postings_.cend(); ++entry) {
     for (LCIter< position_t > pos = entry->second.cbegin(); pos != entry->second.cend(); ++pos) {
       forward.add(*pos, entry->first);

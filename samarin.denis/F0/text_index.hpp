@@ -24,6 +24,8 @@ namespace samarin {
     const PostingsTable& postings() const;
 
   private:
+    std::size_t wordCount() const;
+
     PostingsTable postings_;
     List< std::size_t > lineLengths_;
   };
