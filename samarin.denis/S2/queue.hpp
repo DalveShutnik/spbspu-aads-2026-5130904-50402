@@ -69,7 +69,7 @@ namespace samarin {
       if (data_.empty()) {
         throw std::logic_error("queue is empty");
       }
-      T value = data_.front();
+      T value = std::move(data_.front());
       data_.pop_front();
       if (data_.empty()) {
         tail_ = data_.before_begin();

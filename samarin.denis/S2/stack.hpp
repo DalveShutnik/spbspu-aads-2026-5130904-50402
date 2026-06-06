@@ -41,7 +41,7 @@ namespace samarin {
       if (data_.empty()) {
         throw std::logic_error("stack is empty");
       }
-      T value = data_.front();
+      T value = std::move(data_.front());
       data_.pop_front();
       return value;
     }
