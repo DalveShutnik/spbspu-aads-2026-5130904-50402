@@ -28,7 +28,7 @@ namespace samarin {
     std::size_t pos = 0;
     long long value = 0;
     try {
-      value = std::stoll(token, std::addressof(pos));
+      value = std::stoll(token, &pos);
     } catch (const std::exception&) {
       throw std::logic_error("operand is not a number");
     }

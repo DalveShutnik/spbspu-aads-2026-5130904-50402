@@ -7,14 +7,14 @@
 int main(int argc, char* argv[])
 {
   std::ifstream file;
-  std::istream* input = std::addressof(std::cin);
+  std::istream* input = &std::cin;
   if (argc > 1) {
     file.open(argv[1]);
     if (!file.is_open()) {
       std::cerr << "cannot open input file\n";
       return 1;
     }
-    input = std::addressof(file);
+    input = &file;
   }
 
   samarin::Stack< long long > results;
