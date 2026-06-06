@@ -2,11 +2,9 @@
 #define CALCULATOR_HPP
 
 #include <string>
-#include "queue.hpp"
 
 namespace samarin {
 
-  Queue< std::string > convertToPostfix(Queue< std::string > infix);
   long long calculateExpression(const std::string& line);
 
 }
