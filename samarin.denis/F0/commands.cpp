@@ -369,10 +369,8 @@ namespace samarin {
       return reversed;
     }
 
-    void printContext(std::ostream& out, const Text& text, const position_t& pos, const findopts_t& options)
+    void printContext(std::ostream& out, const Line& line, const position_t& pos, const findopts_t& options)
     {
-      const Line& line = listAt(text, pos.line);
-      const std::size_t width = listSize(line);
       std::size_t lo = pos.word;
       std::size_t hi = pos.word;
       if (options.edge != Edge::right) {
@@ -380,18 +378,18 @@ namespace samarin {
       }
       if (options.edge != Edge::left) {
         hi = pos.word + options.context;
-        if (hi >= width) {
-          hi = width - 1;
-        }
       }
       out << (pos.line + 1) << " " << (pos.word + 1) << ":";
-      for (std::size_t col = lo; col <= hi; ++col) {
-        const std::string& word = listAt(line, col);
+      std::size_t col = 0;
+      for (LCIter< std::string > word = line.cbegin(); word != line.cend() && col <= hi; ++word, ++col) {
+        if (col < lo) {
+          continue;
+        }
         out << " ";
         if (col == pos.word) {
-          out << "[" << word << "]";
+          out << "[" << *word << "]";
         } else {
-          out << word;
+          out << *word;
         }
       }
       out << "\n";
@@ -417,7 +415,7 @@ namespace samarin {
       const Text text = index.restore();
       std::size_t shown = 0;
       for (LCIter< position_t > it = sequence.cbegin(); it != sequence.cend() && shown < options.limit; ++it) {
-        printContext(out, text, *it, options);
+        printContext(out, listAt(text, it->line), *it, options);
         ++shown;
       }
     }
