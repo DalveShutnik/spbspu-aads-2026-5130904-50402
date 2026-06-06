@@ -43,6 +43,11 @@ namespace samarin {
       docs[id].build(text);
     }
 
+    Text restoreDoc(Documents& docs, const std::string& id)
+    {
+      return requireDoc(docs, id).restore();
+    }
+
     void requireStream(const std::istream& in)
     {
       if (!in) {
@@ -106,12 +111,12 @@ namespace samarin {
       std::string file;
       in >> id >> file;
       requireStream(in);
-      const TextIndex& index = requireDoc(docs, id);
+      const Text text = restoreDoc(docs, id);
       std::ofstream sink(file.c_str());
       if (!sink.is_open()) {
         throw std::logic_error("cannot open file");
       }
-      writeText(sink, index.restore());
+      writeText(sink, text);
     }
 
     void cmdList(std::istream&, std::ostream& out, Documents& docs)
@@ -130,7 +135,7 @@ namespace samarin {
     {
       std::string id;
       in >> id;
-      writeText(out, requireDoc(docs, id).restore());
+      writeText(out, restoreDoc(docs, id));
     }
 
     void cmdHelp(std::istream&, std::ostream& out, Documents&)
@@ -153,7 +158,7 @@ namespace samarin {
       in >> id >> newId;
       requireStream(in);
       requireAbsent(docs, newId);
-      storeText(docs, newId, op(requireDoc(docs, id).restore()));
+      storeText(docs, newId, op(restoreDoc(docs, id)));
     }
 
     void runBinary(std::istream& in, Documents& docs, BinaryOp op)
@@ -164,8 +169,8 @@ namespace samarin {
       in >> first >> second >> newId;
       requireStream(in);
       requireAbsent(docs, newId);
-      const Text left = requireDoc(docs, first).restore();
-      const Text right = requireDoc(docs, second).restore();
+      const Text left = restoreDoc(docs, first);
+      const Text right = restoreDoc(docs, second);
       storeText(docs, newId, op(left, right));
     }
 
@@ -177,7 +182,7 @@ namespace samarin {
       in >> id >> times >> newId;
       requireStream(in);
       requireAbsent(docs, newId);
-      storeText(docs, newId, op(requireDoc(docs, id).restore(), times));
+      storeText(docs, newId, op(restoreDoc(docs, id), times));
     }
 
     void cmdConcat(std::istream& in, std::ostream&, Documents& docs)
