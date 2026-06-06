@@ -1,7 +1,6 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
-#include <memory>
 #include <stdexcept>
 #include <utility>
 #include "list.hpp"
@@ -32,7 +31,7 @@ namespace samarin {
 
     Queue< T >& operator=(const Queue< T >& other)
     {
-      if (this != std::addressof(other)) {
+      if (this != &other) {
         Queue< T > tmp(other);
         std::swap(data_, tmp.data_);
         std::swap(tail_, tmp.tail_);
@@ -42,7 +41,7 @@ namespace samarin {
 
     Queue< T >& operator=(Queue< T >&& other) noexcept
     {
-      if (this != std::addressof(other)) {
+      if (this != &other) {
         data_ = std::move(other.data_);
         tail_ = other.tail_;
       }
