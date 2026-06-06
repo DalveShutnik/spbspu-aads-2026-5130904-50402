@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <memory>
-#include "list.hpp"
+#include <list.hpp>
 
 namespace {
   struct Point {
