@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <stdexcept>
-#include <string>
 #include "stack.hpp"
 
 BOOST_AUTO_TEST_SUITE(stack_tests)
@@ -30,13 +29,6 @@ BOOST_AUTO_TEST_CASE(top_peeks_and_mutates)
   BOOST_TEST(st.top() == 5);
   st.top() = 7;
   BOOST_TEST(st.top() == 7);
-}
-
-BOOST_AUTO_TEST_CASE(emplace_forwards_args)
-{
-  samarin::Stack< std::string > st;
-  st.emplace(3, 'a');
-  BOOST_TEST(st.top() == "aaa");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

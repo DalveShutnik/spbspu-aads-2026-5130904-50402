@@ -58,12 +58,6 @@ namespace samarin {
       tail_ = data_.insert_after(tail_, rhs);
     }
 
-    template< class... Args >
-    void emplace(Args&&... args)
-    {
-      tail_ = data_.emplaceAfter(tail_, std::forward< Args >(args)...);
-    }
-
     T drop()
     {
       if (data_.empty()) {

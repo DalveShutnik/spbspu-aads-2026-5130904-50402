@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <stdexcept>
-#include <string>
 #include "queue.hpp"
 
 BOOST_AUTO_TEST_SUITE(queue_tests)
@@ -48,15 +47,6 @@ BOOST_AUTO_TEST_CASE(copy_keeps_independent_tail)
   BOOST_TEST(q.drop() == 1);
   BOOST_TEST(q.drop() == 2);
   BOOST_TEST(q.drop() == 99);
-}
-
-BOOST_AUTO_TEST_CASE(emplace_forwards_args)
-{
-  samarin::Queue< std::string > q;
-  q.emplace(2, 'b');
-  q.push("x");
-  BOOST_TEST(q.drop() == "bb");
-  BOOST_TEST(q.drop() == "x");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

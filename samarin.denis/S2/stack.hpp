@@ -30,12 +30,6 @@ namespace samarin {
       data_.push_front(rhs);
     }
 
-    template< class... Args >
-    void emplace(Args&&... args)
-    {
-      data_.emplaceFront(std::forward< Args >(args)...);
-    }
-
     T drop()
     {
       if (data_.empty()) {
