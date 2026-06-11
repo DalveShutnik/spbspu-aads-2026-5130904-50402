@@ -1,15 +1,16 @@
 #include <boost/test/unit_test.hpp>
+#include <cstddef>
 #include <string>
 #include "graph.hpp"
 
 namespace {
-  size_t countWeights(const samarin::Graph& graph, const std::string& from, const std::string& to)
+  std::size_t countWeights(const samarin::Graph& graph, const std::string& from, const std::string& to)
   {
     const samarin::Graph::EdgeKey key(from, to);
     if (!graph.edges().has(key)) {
       return 0;
     }
-    size_t count = 0;
+    std::size_t count = 0;
     const samarin::Graph::WeightList& weights = graph.edges().at(key);
     for (auto it = weights.cbegin(); it != weights.cend(); ++it) {
       ++count;

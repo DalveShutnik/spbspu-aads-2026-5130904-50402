@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include "hash_table.hpp"
@@ -87,7 +88,7 @@ BOOST_AUTO_TEST_CASE(iteration_visits_all)
   table.add("b", 2);
   table.add("c", 3);
   int sum = 0;
-  size_t count = 0;
+  std::size_t count = 0;
   for (auto it = table.cbegin(); it != table.cend(); ++it) {
     sum += it->second;
     ++count;

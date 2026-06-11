@@ -7,14 +7,14 @@
 
 namespace samarin {
 
-  size_t hashBytes(const char* data, size_t size);
+  std::size_t hashBytes(const char* data, std::size_t size);
 
   struct StringHash {
-    size_t operator()(const std::string& key) const;
+    std::size_t operator()(const std::string& key) const;
   };
 
   struct PairHash {
-    size_t operator()(const std::pair< std::string, std::string >& key) const;
+    std::size_t operator()(const std::pair< std::string, std::string >& key) const;
   };
 
 }

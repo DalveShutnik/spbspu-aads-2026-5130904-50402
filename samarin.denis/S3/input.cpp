@@ -1,5 +1,6 @@
 #include "input.hpp"
 
+#include <cstddef>
 #include <istream>
 #include <string>
 #include "table_utils.hpp"
@@ -8,12 +9,12 @@ void samarin::readGraphs(std::istream& in, GraphCollection& graphs)
 {
   std::string name;
   while (in >> name) {
-    size_t count = 0;
+    std::size_t count = 0;
     if (!(in >> count)) {
       break;
     }
     Graph graph;
-    for (size_t i = 0; i < count; ++i) {
+    for (std::size_t i = 0; i < count; ++i) {
       std::string from;
       std::string to;
       Graph::Weight weight = 0;

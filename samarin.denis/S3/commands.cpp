@@ -1,5 +1,6 @@
 #include "commands.hpp"
 
+#include <cstddef>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -161,10 +162,10 @@ namespace samarin {
     if (graphs.has(name)) {
       throw std::logic_error("graph exists");
     }
-    size_t count = 0;
+    std::size_t count = 0;
     in >> count;
     Graph graph;
-    for (size_t i = 0; i < count; ++i) {
+    for (std::size_t i = 0; i < count; ++i) {
       std::string vertex;
       if (!(in >> vertex)) {
         throw std::logic_error("missing vertex");
@@ -203,13 +204,13 @@ namespace samarin {
     if (!graphs.has(oldName)) {
       throw std::logic_error("no such graph");
     }
-    size_t count = 0;
+    std::size_t count = 0;
     if (!(in >> count)) {
       throw std::logic_error("missing count");
     }
     const Graph& source = graphs.at(oldName);
     Graph graph;
-    for (size_t i = 0; i < count; ++i) {
+    for (std::size_t i = 0; i < count; ++i) {
       std::string vertex;
       if (!(in >> vertex)) {
         throw std::logic_error("missing vertex");

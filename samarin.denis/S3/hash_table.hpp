@@ -67,10 +67,10 @@ namespace samarin {
     friend class HashTable;
 
     const detail::entry_t< Key, Value >* slots_;
-    size_t capacity_;
-    size_t index_;
+    std::size_t capacity_;
+    std::size_t index_;
 
-    HashConstIterator(const detail::entry_t< Key, Value >* slots, size_t capacity, size_t index):
+    HashConstIterator(const detail::entry_t< Key, Value >* slots, std::size_t capacity, std::size_t index):
       slots_(slots),
       capacity_(capacity),
       index_(index)
@@ -97,7 +97,7 @@ namespace samarin {
       size_(0)
     {}
 
-    explicit HashTable(size_t slots):
+    explicit HashTable(std::size_t slots):
       slots_(new detail::entry_t< Key, Value >[slots < 1 ? 1 : slots]),
       capacity_(slots < 1 ? 1 : slots),
       size_(0)
@@ -109,7 +109,7 @@ namespace samarin {
       size_(other.size_)
     {
       try {
-        for (size_t i = 0; i < capacity_; ++i) {
+        for (std::size_t i = 0; i < capacity_; ++i) {
           slots_[i] = other.slots_[i];
         }
       } catch (...) {
@@ -158,19 +158,19 @@ namespace samarin {
 
     Value& operator[](const Key& key)
     {
-      const size_t slot = findOrReserve(key);
+      const std::size_t slot = findOrReserve(key);
       return slots_[slot].data.second;
     }
 
     void add(const Key& key, const Value& value)
     {
-      const size_t slot = findOrReserve(key);
+      const std::size_t slot = findOrReserve(key);
       slots_[slot].data.second = value;
     }
 
     Value& at(const Key& key)
     {
-      const size_t slot = locate(key);
+      const std::size_t slot = locate(key);
       if (slot == capacity_) {
         throw std::out_of_range("key is missing");
       }
@@ -179,7 +179,7 @@ namespace samarin {
 
     const Value& at(const Key& key) const
     {
-      const size_t slot = locate(key);
+      const std::size_t slot = locate(key);
       if (slot == capacity_) {
         throw std::out_of_range("key is missing");
       }
@@ -193,13 +193,13 @@ namespace samarin {
 
     const_iterator find(const Key& key) const
     {
-      const size_t slot = locate(key);
+      const std::size_t slot = locate(key);
       return const_iterator(slots_, capacity_, slot == capacity_ ? capacity_ : slot);
     }
 
     Value drop(const Key& key)
     {
-      const size_t slot = locate(key);
+      const std::size_t slot = locate(key);
       if (slot == capacity_) {
         throw std::out_of_range("key is missing");
       }
@@ -209,13 +209,13 @@ namespace samarin {
       return value;
     }
 
-    void rehash(size_t slots)
+    void rehash(std::size_t slots)
     {
       if (slots < size_) {
         throw std::length_error("too few slots for rehash");
       }
       HashTable< Key, Value, Hash, Equal > rebuilt(slots);
-      for (size_t i = 0; i < capacity_; ++i) {
+      for (std::size_t i = 0; i < capacity_; ++i) {
         if (slots_[i].state == detail::SlotState::occupied) {
           rebuilt.add(slots_[i].data.first, slots_[i].data.second);
         }
@@ -223,12 +223,12 @@ namespace samarin {
       swap(rebuilt);
     }
 
-    size_t size() const
+    std::size_t size() const
     {
       return size_;
     }
 
-    size_t capacity() const
+    std::size_t capacity() const
     {
       return capacity_;
     }
@@ -259,11 +259,11 @@ namespace samarin {
     }
 
   private:
-    static const size_t default_capacity = 16;
+    static const std::size_t default_capacity = 16;
 
     detail::entry_t< Key, Value >* slots_;
-    size_t capacity_;
-    size_t size_;
+    std::size_t capacity_;
+    std::size_t size_;
     Hash hash_;
     Equal equal_;
 
@@ -274,11 +274,11 @@ namespace samarin {
       std::swap(size_, other.size_);
     }
 
-    size_t locate(const Key& key) const
+    std::size_t locate(const Key& key) const
     {
-      const size_t start = hash_(key) % capacity_;
-      for (size_t i = 0; i < capacity_; ++i) {
-        const size_t idx = (start + i) % capacity_;
+      const std::size_t start = hash_(key) % capacity_;
+      for (std::size_t i = 0; i < capacity_; ++i) {
+        const std::size_t idx = (start + i) % capacity_;
         if (slots_[idx].state == detail::SlotState::empty) {
           return capacity_;
         }
@@ -289,12 +289,12 @@ namespace samarin {
       return capacity_;
     }
 
-    size_t findOrReserve(const Key& key)
+    std::size_t findOrReserve(const Key& key)
     {
-      const size_t start = hash_(key) % capacity_;
-      size_t free = capacity_;
-      for (size_t i = 0; i < capacity_; ++i) {
-        const size_t idx = (start + i) % capacity_;
+      const std::size_t start = hash_(key) % capacity_;
+      std::size_t free = capacity_;
+      for (std::size_t i = 0; i < capacity_; ++i) {
+        const std::size_t idx = (start + i) % capacity_;
         const detail::SlotState state = slots_[idx].state;
         if (state == detail::SlotState::occupied) {
           if (equal_(slots_[idx].data.first, key)) {
