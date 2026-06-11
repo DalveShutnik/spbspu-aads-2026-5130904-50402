@@ -1,5 +1,7 @@
 #include "graph.hpp"
 
+#include "table_utils.hpp"
+
 bool samarin::Graph::hasVertex(const std::string& name) const
 {
   return vertices_.has(name);
@@ -7,17 +9,7 @@ bool samarin::Graph::hasVertex(const std::string& name) const
 
 void samarin::Graph::addVertex(const std::string& name)
 {
-  if (vertices_.has(name)) {
-    return;
-  }
-  while (true) {
-    try {
-      vertices_.add(name, true);
-      return;
-    } catch (const std::length_error&) {
-      vertices_.rehash(vertices_.capacity() * 2);
-    }
-  }
+  insertOrGrow(vertices_, name, true);
 }
 
 void samarin::Graph::bind(const std::string& from, const std::string& to, Weight weight)
