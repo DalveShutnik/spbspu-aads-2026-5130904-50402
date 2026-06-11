@@ -1,0 +1,27 @@
+#include "input.hpp"
+
+#include <istream>
+#include <string>
+#include "table_utils.hpp"
+
+void samarin::readGraphs(std::istream& in, GraphCollection& graphs)
+{
+  std::string name;
+  while (in >> name) {
+    size_t count = 0;
+    if (!(in >> count)) {
+      break;
+    }
+    Graph graph;
+    for (size_t i = 0; i < count; ++i) {
+      std::string from;
+      std::string to;
+      Graph::Weight weight = 0;
+      if (!(in >> from >> to >> weight)) {
+        break;
+      }
+      graph.bind(from, to, weight);
+    }
+    insertOrGrow(graphs, name, graph);
+  }
+}
