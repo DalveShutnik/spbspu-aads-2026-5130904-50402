@@ -211,6 +211,14 @@ namespace samarin {
       return LIter< T >(pos.node_->next);
     }
 
+    LIter< T > erase_after(LIter< T > pos)
+    {
+      detail::NodeBase * target = pos.node_->next;
+      pos.node_->next = target->next;
+      delete static_cast< detail::Node< T > * >(target);
+      return LIter< T >(pos.node_->next);
+    }
+
     LIter< T > before_begin()
     {
       return LIter< T >(head_);

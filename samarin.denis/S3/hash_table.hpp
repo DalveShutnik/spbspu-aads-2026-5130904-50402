@@ -168,6 +168,24 @@ namespace samarin {
       slots_[slot].data.second = value;
     }
 
+    Value& at(const Key& key)
+    {
+      const size_t slot = locate(key);
+      if (slot == capacity_) {
+        throw std::out_of_range("key is missing");
+      }
+      return slots_[slot].data.second;
+    }
+
+    const Value& at(const Key& key) const
+    {
+      const size_t slot = locate(key);
+      if (slot == capacity_) {
+        throw std::out_of_range("key is missing");
+      }
+      return slots_[slot].data.second;
+    }
+
     bool has(const Key& key) const
     {
       return locate(key) != capacity_;
