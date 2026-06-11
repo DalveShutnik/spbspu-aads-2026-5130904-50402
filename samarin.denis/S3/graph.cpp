@@ -17,14 +17,7 @@ void samarin::Graph::bind(const std::string& from, const std::string& to, Weight
   addVertex(from);
   addVertex(to);
   const EdgeKey key(from, to);
-  while (true) {
-    try {
-      edges_[key].push_front(weight);
-      return;
-    } catch (const std::length_error&) {
-      edges_.rehash(edges_.capacity() * 2);
-    }
-  }
+  subscriptOrGrow(edges_, key).push_front(weight);
 }
 
 bool samarin::Graph::cut(const std::string& from, const std::string& to, Weight weight)
