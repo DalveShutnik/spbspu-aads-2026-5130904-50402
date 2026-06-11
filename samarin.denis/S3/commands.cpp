@@ -90,6 +90,14 @@ namespace samarin {
     }
   }
 
+  static Graph& requireGraph(GraphCollection& graphs, const std::string& name)
+  {
+    if (!graphs.has(name)) {
+      throw std::logic_error("no such graph");
+    }
+    return graphs.at(name);
+  }
+
   static void cmdGraphs(std::istream&, std::ostream& out, GraphCollection& graphs)
   {
     printKeys(out, graphs);
@@ -99,10 +107,7 @@ namespace samarin {
   {
     std::string name;
     in >> name;
-    if (!graphs.has(name)) {
-      throw std::logic_error("no such graph");
-    }
-    printKeys(out, graphs.at(name).vertices());
+    printKeys(out, requireGraph(graphs, name).vertices());
   }
 
   static void cmdOutbound(std::istream& in, std::ostream& out, GraphCollection& graphs)
@@ -110,10 +115,7 @@ namespace samarin {
     std::string name;
     std::string vertex;
     in >> name >> vertex;
-    if (!graphs.has(name)) {
-      throw std::logic_error("no such graph");
-    }
-    printEdges(out, graphs.at(name), vertex, true);
+    printEdges(out, requireGraph(graphs, name), vertex, true);
   }
 
   static void cmdInbound(std::istream& in, std::ostream& out, GraphCollection& graphs)
@@ -121,10 +123,7 @@ namespace samarin {
     std::string name;
     std::string vertex;
     in >> name >> vertex;
-    if (!graphs.has(name)) {
-      throw std::logic_error("no such graph");
-    }
-    printEdges(out, graphs.at(name), vertex, false);
+    printEdges(out, requireGraph(graphs, name), vertex, false);
   }
 
   static void cmdBind(std::istream& in, std::ostream&, GraphCollection& graphs)
@@ -134,10 +133,7 @@ namespace samarin {
     std::string to;
     Graph::Weight weight = 0;
     in >> name >> from >> to >> weight;
-    if (!graphs.has(name)) {
-      throw std::logic_error("no such graph");
-    }
-    graphs.at(name).bind(from, to, weight);
+    requireGraph(graphs, name).bind(from, to, weight);
   }
 
   static void cmdCut(std::istream& in, std::ostream&, GraphCollection& graphs)
@@ -147,10 +143,7 @@ namespace samarin {
     std::string to;
     Graph::Weight weight = 0;
     in >> name >> from >> to >> weight;
-    if (!graphs.has(name)) {
-      throw std::logic_error("no such graph");
-    }
-    if (!graphs.at(name).cut(from, to, weight)) {
+    if (!requireGraph(graphs, name).cut(from, to, weight)) {
       throw std::logic_error("no such edge");
     }
   }
