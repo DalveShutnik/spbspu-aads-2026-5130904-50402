@@ -197,8 +197,7 @@ namespace samarin {
 
     const_iterator find(const Key& key) const
     {
-      const std::size_t slot = locate(key);
-      return const_iterator(slots_, capacity_, slot == capacity_ ? capacity_ : slot);
+      return const_iterator(slots_, capacity_, locate(key));
     }
 
     Value drop(const Key& key)
