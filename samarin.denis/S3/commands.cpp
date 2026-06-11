@@ -260,10 +260,11 @@ void samarin::processCommands(std::istream& in, std::ostream& out, GraphCollecti
       continue;
     }
     try {
-      if (!commands.has(name)) {
+      const CommandTable::const_iterator handler = commands.find(name);
+      if (handler == commands.cend()) {
         throw std::logic_error("unknown command");
       }
-      commands.at(name)(stream, out, graphs);
+      handler->second(stream, out, graphs);
     } catch (const std::exception&) {
       out << "<INVALID COMMAND>\n";
     }
