@@ -98,15 +98,17 @@ namespace samarin {
     {}
 
     explicit HashTable(std::size_t slots):
-      slots_(new detail::entry_t< Key, Value >[slots < 1 ? 1 : slots]),
-      capacity_(slots < 1 ? 1 : slots),
+      slots_(new detail::entry_t< Key, Value >[slots < min_capacity ? min_capacity : slots]),
+      capacity_(slots < min_capacity ? min_capacity : slots),
       size_(0)
     {}
 
     HashTable(const HashTable< Key, Value, Hash, Equal >& other):
       slots_(new detail::entry_t< Key, Value >[other.capacity_]),
       capacity_(other.capacity_),
-      size_(other.size_)
+      size_(other.size_),
+      hash_(other.hash_),
+      equal_(other.equal_)
     {
       try {
         for (std::size_t i = 0; i < capacity_; ++i) {
@@ -121,7 +123,9 @@ namespace samarin {
     HashTable(HashTable< Key, Value, Hash, Equal >&& other) noexcept:
       slots_(other.slots_),
       capacity_(other.capacity_),
-      size_(other.size_)
+      size_(other.size_),
+      hash_(other.hash_),
+      equal_(other.equal_)
     {
       other.slots_ = nullptr;
       other.capacity_ = 0;
@@ -259,6 +263,7 @@ namespace samarin {
     }
 
   private:
+    static const std::size_t min_capacity = 1;
     static const std::size_t default_capacity = 16;
 
     detail::entry_t< Key, Value >* slots_;
@@ -272,6 +277,8 @@ namespace samarin {
       std::swap(slots_, other.slots_);
       std::swap(capacity_, other.capacity_);
       std::swap(size_, other.size_);
+      std::swap(hash_, other.hash_);
+      std::swap(equal_, other.equal_);
     }
 
     std::size_t locate(const Key& key) const
@@ -292,7 +299,7 @@ namespace samarin {
     std::size_t findOrReserve(const Key& key)
     {
       const std::size_t start = hash_(key) % capacity_;
-      std::size_t free = capacity_;
+      std::size_t freeSlot = capacity_;
       for (std::size_t i = 0; i < capacity_; ++i) {
         const std::size_t idx = (start + i) % capacity_;
         const detail::SlotState state = slots_[idx].state;
@@ -301,22 +308,22 @@ namespace samarin {
             return idx;
           }
         } else {
-          if (free == capacity_) {
-            free = idx;
+          if (freeSlot == capacity_) {
+            freeSlot = idx;
           }
           if (state == detail::SlotState::empty) {
             break;
           }
         }
       }
-      if (free == capacity_) {
+      if (freeSlot == capacity_) {
         throw std::length_error("hash table is full");
       }
-      slots_[free].data.first = key;
-      slots_[free].data.second = Value();
-      slots_[free].state = detail::SlotState::occupied;
+      slots_[freeSlot].data.first = key;
+      slots_[freeSlot].data.second = Value();
+      slots_[freeSlot].state = detail::SlotState::occupied;
       ++size_;
-      return free;
+      return freeSlot;
     }
   };
 
