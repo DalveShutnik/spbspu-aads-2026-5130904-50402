@@ -285,9 +285,14 @@ namespace samarin {
       std::swap(equal_, other.equal_);
     }
 
+    std::size_t startIndex(const Key& key) const
+    {
+      return hash_(key) % capacity_;
+    }
+
     std::size_t locate(const Key& key) const
     {
-      const std::size_t start = hash_(key) % capacity_;
+      const std::size_t start = startIndex(key);
       for (std::size_t i = 0; i < capacity_; ++i) {
         const std::size_t idx = (start + i) % capacity_;
         if (slots_[idx].state == detail::SlotState::empty) {
@@ -302,7 +307,7 @@ namespace samarin {
 
     std::size_t findOrReserve(const Key& key)
     {
-      const std::size_t start = hash_(key) % capacity_;
+      const std::size_t start = startIndex(key);
       std::size_t freeSlot = capacity_;
       for (std::size_t i = 0; i < capacity_; ++i) {
         const std::size_t idx = (start + i) % capacity_;
