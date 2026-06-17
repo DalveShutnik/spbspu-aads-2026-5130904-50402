@@ -123,6 +123,9 @@ namespace samarin {
     std::string to;
     Graph::Weight weight = 0;
     in >> name >> from >> to >> weight;
+    if (!in) {
+      throw std::logic_error("invalid arguments");
+    }
     requireGraph(graphs, name).bind(from, to, weight);
   }
 
