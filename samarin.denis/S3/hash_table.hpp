@@ -98,8 +98,8 @@ namespace samarin {
     {}
 
     explicit HashTable(std::size_t slots):
-      slots_(new detail::Entry< Key, Value >[slots < min_capacity ? min_capacity : slots]),
-      capacity_(slots < min_capacity ? min_capacity : slots),
+      slots_(new detail::Entry< Key, Value >[atLeastMin(slots)]),
+      capacity_(atLeastMin(slots)),
       size_(0)
     {}
 
@@ -264,6 +264,11 @@ namespace samarin {
   private:
     static constexpr std::size_t min_capacity = 1;
     static constexpr std::size_t default_capacity = 16;
+
+    static std::size_t atLeastMin(std::size_t slots)
+    {
+      return slots < min_capacity ? min_capacity : slots;
+    }
 
     detail::Entry< Key, Value >* slots_;
     std::size_t capacity_;
