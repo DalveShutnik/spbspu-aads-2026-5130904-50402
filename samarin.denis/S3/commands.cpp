@@ -107,20 +107,22 @@ namespace samarin {
     printKeys(out, requireGraph(graphs, name).vertices());
   }
 
-  static void cmdOutbound(std::istream& in, std::ostream& out, GraphCollection& graphs)
+  static void printEdgesCommand(std::istream& in, std::ostream& out, GraphCollection& graphs, bool outbound)
   {
     std::string name;
     std::string vertex;
     in >> name >> vertex;
-    printEdges(out, requireGraph(graphs, name), vertex, true);
+    printEdges(out, requireGraph(graphs, name), vertex, outbound);
+  }
+
+  static void cmdOutbound(std::istream& in, std::ostream& out, GraphCollection& graphs)
+  {
+    printEdgesCommand(in, out, graphs, true);
   }
 
   static void cmdInbound(std::istream& in, std::ostream& out, GraphCollection& graphs)
   {
-    std::string name;
-    std::string vertex;
-    in >> name >> vertex;
-    printEdges(out, requireGraph(graphs, name), vertex, false);
+    printEdgesCommand(in, out, graphs, false);
   }
 
   static void cmdBind(std::istream& in, std::ostream&, GraphCollection& graphs)
