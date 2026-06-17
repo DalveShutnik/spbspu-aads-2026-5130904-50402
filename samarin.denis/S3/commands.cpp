@@ -203,15 +203,7 @@ namespace samarin {
       }
       graph.addVertex(vertex);
     }
-    for (auto it = source.edges().cbegin(); it != source.edges().cend(); ++it) {
-      const std::string& from = it->first.first;
-      const std::string& to = it->first.second;
-      if (graph.hasVertex(from) && graph.hasVertex(to)) {
-        for (auto w = it->second.cbegin(); w != it->second.cend(); ++w) {
-          graph.bind(from, to, *w);
-        }
-      }
-    }
+    graph.copyEdgesWithin(source);
     insertOrGrow(graphs, newName, graph);
   }
 
