@@ -262,8 +262,8 @@ namespace samarin {
     }
 
   private:
-    static const std::size_t min_capacity = 1;
-    static const std::size_t default_capacity = 16;
+    static constexpr std::size_t min_capacity = 1;
+    static constexpr std::size_t default_capacity = 16;
 
     detail::Entry< Key, Value >* slots_;
     std::size_t capacity_;
