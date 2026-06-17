@@ -17,7 +17,7 @@ namespace samarin {
   using CommandHandler = void (*)(std::istream&, std::ostream&, GraphCollection&);
   using CommandTable = HashTable< std::string, CommandHandler, StringHash >;
 
-  struct neighbor_t {
+  struct Neighbor {
     std::string name;
     Graph::WeightList weights;
   };
@@ -44,7 +44,7 @@ namespace samarin {
     return lhs < rhs;
   }
 
-  static bool lessNeighbor(const neighbor_t& lhs, const neighbor_t& rhs)
+  static bool lessNeighbor(const Neighbor& lhs, const Neighbor& rhs)
   {
     return lhs.name < rhs.name;
   }
@@ -66,7 +66,7 @@ namespace samarin {
     if (!graph.hasVertex(vertex)) {
       throw std::logic_error("no such vertex");
     }
-    List< neighbor_t > neighbors;
+    List< Neighbor > neighbors;
     for (auto it = graph.edges().cbegin(); it != graph.edges().cend(); ++it) {
       const std::string& from = it->first.first;
       const std::string& to = it->first.second;
@@ -74,7 +74,7 @@ namespace samarin {
       if (!match) {
         continue;
       }
-      neighbor_t entry;
+      Neighbor entry;
       entry.name = outbound ? to : from;
       for (auto w = it->second.cbegin(); w != it->second.cend(); ++w) {
         sortedInsert(entry.weights, *w, &lessWeight);
