@@ -136,6 +136,9 @@ namespace samarin {
     std::string to;
     Graph::Weight weight = 0;
     in >> name >> from >> to >> weight;
+    if (!in) {
+      throw std::logic_error("invalid arguments");
+    }
     if (!requireGraph(graphs, name).cut(from, to, weight)) {
       throw std::logic_error("no such edge");
     }
