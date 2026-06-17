@@ -16,7 +16,7 @@ namespace samarin {
     };
 
     template< class Key, class Value >
-    struct entry_t {
+    struct Entry {
       std::pair< Key, Value > data;
       SlotState state = SlotState::empty;
     };
@@ -66,11 +66,11 @@ namespace samarin {
     template< class K, class V, class H, class E >
     friend class HashTable;
 
-    const detail::entry_t< Key, Value >* slots_;
+    const detail::Entry< Key, Value >* slots_;
     std::size_t capacity_;
     std::size_t index_;
 
-    HashConstIterator(const detail::entry_t< Key, Value >* slots, std::size_t capacity, std::size_t index):
+    HashConstIterator(const detail::Entry< Key, Value >* slots, std::size_t capacity, std::size_t index):
       slots_(slots),
       capacity_(capacity),
       index_(index)
@@ -92,19 +92,19 @@ namespace samarin {
     using const_iterator = HashConstIterator< Key, Value >;
 
     HashTable():
-      slots_(new detail::entry_t< Key, Value >[default_capacity]),
+      slots_(new detail::Entry< Key, Value >[default_capacity]),
       capacity_(default_capacity),
       size_(0)
     {}
 
     explicit HashTable(std::size_t slots):
-      slots_(new detail::entry_t< Key, Value >[slots < min_capacity ? min_capacity : slots]),
+      slots_(new detail::Entry< Key, Value >[slots < min_capacity ? min_capacity : slots]),
       capacity_(slots < min_capacity ? min_capacity : slots),
       size_(0)
     {}
 
     HashTable(const HashTable< Key, Value, Hash, Equal >& other):
-      slots_(new detail::entry_t< Key, Value >[other.capacity_]),
+      slots_(new detail::Entry< Key, Value >[other.capacity_]),
       capacity_(other.capacity_),
       size_(other.size_),
       hash_(other.hash_),
@@ -265,7 +265,7 @@ namespace samarin {
     static const std::size_t min_capacity = 1;
     static const std::size_t default_capacity = 16;
 
-    detail::entry_t< Key, Value >* slots_;
+    detail::Entry< Key, Value >* slots_;
     std::size_t capacity_;
     std::size_t size_;
     Hash hash_;
