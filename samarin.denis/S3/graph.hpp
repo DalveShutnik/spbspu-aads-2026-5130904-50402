@@ -22,6 +22,7 @@ namespace samarin {
     void bind(const std::string& from, const std::string& to, Weight weight);
     bool cut(const std::string& from, const std::string& to, Weight weight);
     void absorb(const Graph& other);
+    void copyEdgesWithin(const Graph& source);
 
     const VertexTable& vertices() const;
     const EdgeTable& edges() const;

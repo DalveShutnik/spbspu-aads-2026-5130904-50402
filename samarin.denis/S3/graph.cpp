@@ -53,6 +53,19 @@ void samarin::Graph::absorb(const Graph& other)
   }
 }
 
+void samarin::Graph::copyEdgesWithin(const Graph& source)
+{
+  for (auto it = source.edges_.cbegin(); it != source.edges_.cend(); ++it) {
+    const std::string& from = it->first.first;
+    const std::string& to = it->first.second;
+    if (hasVertex(from) && hasVertex(to)) {
+      for (auto w = it->second.cbegin(); w != it->second.cend(); ++w) {
+        bind(from, to, *w);
+      }
+    }
+  }
+}
+
 const samarin::Graph::VertexTable& samarin::Graph::vertices() const
 {
   return vertices_;
