@@ -178,12 +178,9 @@ namespace samarin {
     std::string second;
     in >> newName >> first >> second;
     requireAbsent(graphs, newName);
-    if (!graphs.has(first) || !graphs.has(second)) {
-      throw std::logic_error("no such graph");
-    }
     Graph graph;
-    graph.absorb(graphs.at(first));
-    graph.absorb(graphs.at(second));
+    graph.absorb(requireGraph(graphs, first));
+    graph.absorb(requireGraph(graphs, second));
     insertOrGrow(graphs, newName, graph);
   }
 
