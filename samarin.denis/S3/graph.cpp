@@ -46,11 +46,7 @@ void samarin::Graph::absorb(const Graph& other)
   for (auto it = other.vertices_.cbegin(); it != other.vertices_.cend(); ++it) {
     addVertex(it->first);
   }
-  for (auto it = other.edges_.cbegin(); it != other.edges_.cend(); ++it) {
-    for (auto w = it->second.cbegin(); w != it->second.cend(); ++w) {
-      bind(it->first.first, it->first.second, *w);
-    }
-  }
+  copyEdgesWithin(other);
 }
 
 void samarin::Graph::copyEdgesWithin(const Graph& source)
