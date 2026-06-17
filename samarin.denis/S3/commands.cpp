@@ -190,14 +190,11 @@ namespace samarin {
     std::string oldName;
     in >> newName >> oldName;
     requireAbsent(graphs, newName);
-    if (!graphs.has(oldName)) {
-      throw std::logic_error("no such graph");
-    }
+    const Graph& source = requireGraph(graphs, oldName);
     std::size_t count = 0;
     if (!(in >> count)) {
       throw std::logic_error("missing count");
     }
-    const Graph& source = graphs.at(oldName);
     Graph graph;
     for (std::size_t i = 0; i < count; ++i) {
       std::string vertex;
