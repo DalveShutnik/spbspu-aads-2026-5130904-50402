@@ -20,33 +20,23 @@ namespace samarin {
   struct Neighbor {
     std::string name;
     Graph::WeightList weights;
+
+    bool operator<(const Neighbor& other) const
+    {
+      return name < other.name;
+    }
   };
 
-  template< class T, class Compare >
-  static void sortedInsert(List< T >& list, const T& value, Compare less)
+  template< class T >
+  static void sortedInsert(List< T >& list, const T& value)
   {
     LIter< T > prev = list.before_begin();
     LIter< T > cur = list.begin();
-    while (cur != list.end() && less(*cur, value)) {
+    while (cur != list.end() && *cur < value) {
       prev = cur;
       ++cur;
     }
     list.insert_after(prev, value);
-  }
-
-  static bool lessString(const std::string& lhs, const std::string& rhs)
-  {
-    return lhs < rhs;
-  }
-
-  static bool lessWeight(Graph::Weight lhs, Graph::Weight rhs)
-  {
-    return lhs < rhs;
-  }
-
-  static bool lessNeighbor(const Neighbor& lhs, const Neighbor& rhs)
-  {
-    return lhs.name < rhs.name;
   }
 
   template< class Table >
@@ -54,7 +44,7 @@ namespace samarin {
   {
     List< std::string > names;
     for (auto it = table.cbegin(); it != table.cend(); ++it) {
-      sortedInsert(names, it->first, &lessString);
+      sortedInsert(names, it->first);
     }
     for (auto it = names.cbegin(); it != names.cend(); ++it) {
       out << *it << "\n";
@@ -77,9 +67,9 @@ namespace samarin {
       Neighbor entry;
       entry.name = outbound ? to : from;
       for (auto w = it->second.cbegin(); w != it->second.cend(); ++w) {
-        sortedInsert(entry.weights, *w, &lessWeight);
+        sortedInsert(entry.weights, *w);
       }
-      sortedInsert(neighbors, entry, &lessNeighbor);
+      sortedInsert(neighbors, entry);
     }
     for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
       out << it->name;
