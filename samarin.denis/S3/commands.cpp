@@ -88,6 +88,13 @@ namespace samarin {
     return graphs.at(name);
   }
 
+  static void requireAbsent(const GraphCollection& graphs, const std::string& name)
+  {
+    if (graphs.has(name)) {
+      throw std::logic_error("graph exists");
+    }
+  }
+
   static void cmdGraphs(std::istream&, std::ostream& out, GraphCollection& graphs)
   {
     printKeys(out, graphs);
@@ -148,9 +155,7 @@ namespace samarin {
   {
     std::string name;
     in >> name;
-    if (graphs.has(name)) {
-      throw std::logic_error("graph exists");
-    }
+    requireAbsent(graphs, name);
     std::size_t count = 0;
     in >> count;
     Graph graph;
@@ -170,9 +175,7 @@ namespace samarin {
     std::string first;
     std::string second;
     in >> newName >> first >> second;
-    if (graphs.has(newName)) {
-      throw std::logic_error("graph exists");
-    }
+    requireAbsent(graphs, newName);
     if (!graphs.has(first) || !graphs.has(second)) {
       throw std::logic_error("no such graph");
     }
@@ -187,9 +190,7 @@ namespace samarin {
     std::string newName;
     std::string oldName;
     in >> newName >> oldName;
-    if (graphs.has(newName)) {
-      throw std::logic_error("graph exists");
-    }
+    requireAbsent(graphs, newName);
     if (!graphs.has(oldName)) {
       throw std::logic_error("no such graph");
     }
