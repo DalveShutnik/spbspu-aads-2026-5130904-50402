@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "list.hpp"
+#include <list.hpp>
 
 using samarin::List;
 using samarin::LIter;
@@ -130,7 +130,8 @@ BOOST_AUTO_TEST_CASE(test_self_assignment)
 {
   List< int > lst;
   lst.push_front(1);
-  lst = lst;
+  List< int >& self = lst;
+  lst = self;
   BOOST_TEST(lst.front() == 1);
 }
 
