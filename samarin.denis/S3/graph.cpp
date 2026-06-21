@@ -1,5 +1,6 @@
 #include "graph.hpp"
 
+#include <utility>
 #include "table_utils.hpp"
 
 bool samarin::Graph::hasVertex(const std::string& name) const
@@ -27,18 +28,25 @@ bool samarin::Graph::cut(const std::string& from, const std::string& to, Weight 
     return false;
   }
   WeightList& weights = edges_.at(key);
-  LIter< Weight > prev = weights.before_begin();
+  WeightList kept;
+  LIter< Weight > tail = kept.before_begin();
+  bool removed = false;
   for (LIter< Weight > cur = weights.begin(); cur != weights.end(); ++cur) {
-    if (*cur == weight) {
-      weights.erase_after(prev);
-      if (weights.empty()) {
-        edges_.drop(key);
-      }
-      return true;
+    if (!removed && *cur == weight) {
+      removed = true;
+      continue;
     }
-    prev = cur;
+    tail = kept.insert_after(tail, *cur);
   }
-  return false;
+  if (!removed) {
+    return false;
+  }
+  if (kept.empty()) {
+    edges_.drop(key);
+  } else {
+    weights = std::move(kept);
+  }
+  return true;
 }
 
 void samarin::Graph::absorb(const Graph& other)

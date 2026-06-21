@@ -9,7 +9,7 @@
 #include "graph.hpp"
 #include "hash_table.hpp"
 #include "hashers.hpp"
-#include "list.hpp"
+#include <list.hpp>
 #include "table_utils.hpp"
 
 namespace samarin {
