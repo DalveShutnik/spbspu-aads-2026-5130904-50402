@@ -379,6 +379,36 @@ namespace samarin {
       std::swap(cmp_, other.cmp_);
     }
 
+    iterator begin()
+    {
+      return iterator(detail::leftmost(root_));
+    }
+
+    iterator end()
+    {
+      return iterator(nullptr);
+    }
+
+    const_iterator begin() const
+    {
+      return cbegin();
+    }
+
+    const_iterator end() const
+    {
+      return cend();
+    }
+
+    const_iterator cbegin() const
+    {
+      return const_iterator(detail::leftmost(root_));
+    }
+
+    const_iterator cend() const
+    {
+      return const_iterator(static_cast< const detail::TreeNode< Key, Value > * >(nullptr));
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
