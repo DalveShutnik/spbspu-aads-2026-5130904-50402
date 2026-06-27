@@ -65,6 +65,7 @@ int main()
   LIter< Number > sumsTail = sums.before_begin();
 
   const LCIter< Number > endMarker;
+  bool overflow = false;
   bool anyRemaining = true;
   while (anyRemaining) {
     anyRemaining = false;
@@ -82,11 +83,10 @@ int main()
         lineStarted = true;
 
         if (val > 0 && sum > std::numeric_limits< Number >::max() - val) {
-          std::cerr << "overflow" << "\n";
-          return 1;
+          overflow = true;
+        } else {
+          sum += val;
         }
-
-        sum += val;
         ++(*pit);
       }
     }
@@ -95,6 +95,11 @@ int main()
       std::cout << "\n";
       sumsTail = sums.insert_after(sumsTail, sum);
     }
+  }
+
+  if (overflow) {
+    std::cerr << "overflow" << "\n";
+    return 1;
   }
 
   if (sums.empty()) {
