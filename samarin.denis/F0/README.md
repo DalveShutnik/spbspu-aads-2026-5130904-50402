@@ -42,8 +42,15 @@ reverse-words <id> <new_id>
 transpose <id> <new_id>
 
 find <id> <word> [--limit=k] [--from=start|end] [--edge=left|right] [--context=k]
+find-first <id> <word> <k>  первые k вхождений
+find-last <id> <word> <k>   последние k вхождений
+find-around <id> <word> <k> вхождения с k словами контекста по обе стороны
+find-count <id> <word>      число вхождений
 dump-index <id>
 ```
+
+`find-first`, `find-last`, `find-around` и `find-count` — узкие варианты
+`find`: то же самое, но без флагов, под один сценарий каждая.
 
 Команды читаются из стандартного ввода; на некорректную команду выводится
 `<INVALID COMMAND>`.
