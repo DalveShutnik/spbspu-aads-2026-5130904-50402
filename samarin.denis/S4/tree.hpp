@@ -255,6 +255,11 @@ namespace samarin {
       return cend();
     }
 
+    bool contains(const Key & key) const
+    {
+      return find(key) != cend();
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
