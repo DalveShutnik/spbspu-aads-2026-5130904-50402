@@ -154,6 +154,12 @@ namespace samarin {
       cmp_()
     {}
 
+    BSTree(const BSTree< Key, Value, Compare > & other):
+      root_(clone(other.root_, nullptr)),
+      size_(other.size_),
+      cmp_(other.cmp_)
+    {}
+
     ~BSTree()
     {
       destroy(root_);
@@ -163,6 +169,23 @@ namespace samarin {
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
     Compare cmp_;
+
+    static detail::TreeNode< Key, Value > * clone(const detail::TreeNode< Key, Value > * node,
+        detail::TreeNode< Key, Value > * parent)
+    {
+      if (node == nullptr) {
+        return nullptr;
+      }
+      detail::TreeNode< Key, Value > * fresh = new detail::TreeNode< Key, Value >{ node->data, nullptr, nullptr, parent };
+      try {
+        fresh->left = clone(node->left, fresh);
+        fresh->right = clone(node->right, fresh);
+      } catch (...) {
+        destroy(fresh);
+        throw;
+      }
+      return fresh;
+    }
 
     static void destroy(detail::TreeNode< Key, Value > * node)
     {
