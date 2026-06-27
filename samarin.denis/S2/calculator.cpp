@@ -108,7 +108,11 @@ namespace samarin {
     if (a == std::numeric_limits< long long >::min() && b == -1) {
       return 0;
     }
-    return a % b;
+    long long result = a % b;
+    if (result < 0) {
+      result += (b > 0) ? b : -b;
+    }
+    return result;
   }
 
   static long long applyOperator(const std::string& op, long long left, long long right)
