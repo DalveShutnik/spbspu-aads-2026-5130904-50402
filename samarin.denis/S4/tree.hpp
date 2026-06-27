@@ -387,7 +387,7 @@ namespace samarin {
 
     const_iterator cend() const
     {
-      return const_iterator(static_cast< const detail::TreeNode< Key, Value > * >(nullptr));
+      return const_iterator(nullptr);
     }
 
   private:
