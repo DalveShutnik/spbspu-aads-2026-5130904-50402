@@ -41,6 +41,56 @@ namespace samarin {
     }
   }
 
+  template< class Key, class Value >
+  class BSTConstIterator;
+
+  template< class Key, class Value >
+  class BSTIterator {
+  public:
+    std::pair< Key, Value > & operator*() const
+    {
+      return node_->data;
+    }
+
+    std::pair< Key, Value > * operator->() const
+    {
+      return std::addressof(node_->data);
+    }
+
+    BSTIterator< Key, Value > & operator++()
+    {
+      node_ = detail::successor(node_);
+      return *this;
+    }
+
+    BSTIterator< Key, Value > operator++(int)
+    {
+      BSTIterator< Key, Value > tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const BSTIterator< Key, Value > & other) const
+    {
+      return node_ == other.node_;
+    }
+
+    bool operator!=(const BSTIterator< Key, Value > & other) const
+    {
+      return node_ != other.node_;
+    }
+
+  private:
+    template< class K, class V, class C >
+    friend class BSTree;
+    friend class BSTConstIterator< Key, Value >;
+    detail::TreeNode< Key, Value > * node_;
+
+    explicit BSTIterator(detail::TreeNode< Key, Value > * node):
+      node_(node)
+    {}
+  };
+
 }
 
 #endif
