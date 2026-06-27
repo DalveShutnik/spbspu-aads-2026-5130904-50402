@@ -196,10 +196,45 @@ namespace samarin {
       return *this;
     }
 
+    void push(const Key & key, const Value & value)
+    {
+      detail::TreeNode< Key, Value > * parent = nullptr;
+      detail::TreeNode< Key, Value > * cur = root_;
+      bool toLeft = false;
+      while (cur != nullptr) {
+        parent = cur;
+        if (cmp_(key, cur->data.first)) {
+          cur = cur->left;
+          toLeft = true;
+        } else if (cmp_(cur->data.first, key)) {
+          cur = cur->right;
+          toLeft = false;
+        } else {
+          cur->data.second = value;
+          return;
+        }
+      }
+      detail::TreeNode< Key, Value > * node = makeNode(key, value, parent);
+      if (parent == nullptr) {
+        root_ = node;
+      } else if (toLeft) {
+        parent->left = node;
+      } else {
+        parent->right = node;
+      }
+      ++size_;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
     Compare cmp_;
+
+    static detail::TreeNode< Key, Value > * makeNode(const Key & key, const Value & value,
+        detail::TreeNode< Key, Value > * parent)
+    {
+      return new detail::TreeNode< Key, Value >{ value_type(key, value), nullptr, nullptr, parent };
+    }
 
     static detail::TreeNode< Key, Value > * clone(const detail::TreeNode< Key, Value > * node,
         detail::TreeNode< Key, Value > * parent)
