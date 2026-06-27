@@ -46,6 +46,10 @@ namespace samarin {
     for (auto it = table.cbegin(); it != table.cend(); ++it) {
       sortedInsert(names, it->first);
     }
+    if (names.empty()) {
+      out << "\n";
+      return;
+    }
     for (auto it = names.cbegin(); it != names.cend(); ++it) {
       out << *it << "\n";
     }
@@ -70,6 +74,10 @@ namespace samarin {
         sortedInsert(entry.weights, *w);
       }
       sortedInsert(neighbors, entry);
+    }
+    if (neighbors.empty()) {
+      out << "\n";
+      return;
     }
     for (auto it = neighbors.cbegin(); it != neighbors.cend(); ++it) {
       out << it->name;
