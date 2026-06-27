@@ -141,6 +141,40 @@ namespace samarin {
     {}
   };
 
+  template< class Key, class Value, class Compare = std::less< Key > >
+  class BSTree {
+  public:
+    using value_type = std::pair< Key, Value >;
+    using iterator = BSTIterator< Key, Value >;
+    using const_iterator = BSTConstIterator< Key, Value >;
+
+    BSTree():
+      root_(nullptr),
+      size_(0),
+      cmp_()
+    {}
+
+    ~BSTree()
+    {
+      destroy(root_);
+    }
+
+  private:
+    detail::TreeNode< Key, Value > * root_;
+    std::size_t size_;
+    Compare cmp_;
+
+    static void destroy(detail::TreeNode< Key, Value > * node)
+    {
+      if (node == nullptr) {
+        return;
+      }
+      destroy(node->left);
+      destroy(node->right);
+      delete node;
+    }
+  };
+
 }
 
 #endif
