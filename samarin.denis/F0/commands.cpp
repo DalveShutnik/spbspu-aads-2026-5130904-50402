@@ -395,22 +395,18 @@ namespace samarin {
       out << "\n";
     }
 
-    void cmdFind(std::istream& in, std::ostream& out, Documents& docs)
+    findopts_t readFindOptions(std::istream& in)
     {
-      std::string id;
-      std::string word;
-      in >> id >> word;
-      requireStream(in);
       findopts_t options = { std::numeric_limits< std::size_t >::max(), false, Edge::both, 0 };
       std::string flag;
       while (in >> flag) {
         parseFlag(flag, options);
       }
-      const TextIndex& index = requireDoc(docs, id);
-      if (!index.has(word)) {
-        out << "<EMPTY>\n";
-        return;
-      }
+      return options;
+    }
+
+    void printMatches(std::ostream& out, const TextIndex& index, const std::string& word, const findopts_t& options)
+    {
       const List< position_t > sequence = collectSequence(index.positions(word), options.fromEnd);
       const Text text = index.restore();
       std::size_t shown = 0;
@@ -418,6 +414,21 @@ namespace samarin {
         printContext(out, listAt(text, it->line), *it, options);
         ++shown;
       }
+    }
+
+    void cmdFind(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      in >> id >> word;
+      requireStream(in);
+      const findopts_t options = readFindOptions(in);
+      const TextIndex& index = requireDoc(docs, id);
+      if (!index.has(word)) {
+        out << "<EMPTY>\n";
+        return;
+      }
+      printMatches(out, index, word, options);
     }
 
     void cmdDumpIndex(std::istream& in, std::ostream& out, Documents& docs)
