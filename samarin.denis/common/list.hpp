@@ -13,8 +13,10 @@ namespace samarin {
     };
   }
 
-  template< class T > class List;
-  template< class T > class LCIter;
+  template< class T >
+  class List;
+  template< class T >
+  class LCIter;
 
   template< class T >
   class LIter {
@@ -61,8 +63,8 @@ namespace samarin {
       node_(nullptr)
     {}
 
-    explicit LIter(detail::node_t< T > * n):
-      node_(n)
+    explicit LIter(detail::node_t< T > * node):
+      node_(node)
     {}
   };
 
@@ -114,8 +116,8 @@ namespace samarin {
     friend class List< T >;
     const detail::node_t< T > * node_;
 
-    explicit LCIter(const detail::node_t< T > * n):
-      node_(n)
+    explicit LCIter(const detail::node_t< T > * node):
+      node_(node)
     {}
   };
 
@@ -170,26 +172,24 @@ namespace samarin {
     List< T >& operator=(List< T >&& other) noexcept
     {
       if (this != &other) {
-        clear();
-        delete head_;
-        head_ = other.head_;
-        other.head_ = nullptr;
+        List< T > tmp(std::move(other));
+        std::swap(head_, tmp.head_);
       }
       return *this;
     }
 
-    void push_front(const T& v)
+    void push_front(const T& value)
     {
       detail::node_t< T > * node = new detail::node_t< T >;
-      node->value = v;
+      node->value = value;
       node->next = head_->next;
       head_->next = node;
     }
 
-    LIter< T > insert_after(LIter< T > pos, const T& v)
+    LIter< T > insert_after(LIter< T > pos, const T& value)
     {
       detail::node_t< T > * node = new detail::node_t< T >;
-      node->value = v;
+      node->value = value;
       node->next = pos.node_->next;
       pos.node_->next = node;
       return LIter< T >(node);
