@@ -365,6 +365,13 @@ namespace samarin {
       return value;
     }
 
+    void clear()
+    {
+      destroy(root_);
+      root_ = nullptr;
+      size_ = 0;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
