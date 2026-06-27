@@ -25,6 +25,20 @@ namespace samarin {
       }
       return node;
     }
+
+    template< class Node >
+    Node * successor(Node * node)
+    {
+      if (node->right != nullptr) {
+        return leftmost(node->right);
+      }
+      Node * parent = node->parent;
+      while (parent != nullptr && node == parent->right) {
+        node = parent;
+        parent = parent->parent;
+      }
+      return parent;
+    }
   }
 
 }
