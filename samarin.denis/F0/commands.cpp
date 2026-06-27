@@ -144,7 +144,7 @@ namespace samarin {
       out << "replace swap insert-line remove-line\n";
       out << "concat concat-lines repeat-vertical repeat-horizontal\n";
       out << "interleave-lines interleave-words reverse-lines reverse-words transpose\n";
-      out << "find dump-index\n";
+      out << "find find-first find-last find-around find-count dump-index\n";
     }
 
     using UnaryOp = Text (*)(const Text&);
@@ -431,6 +431,59 @@ namespace samarin {
       printMatches(out, index, word, options);
     }
 
+    void emitScoped(std::ostream& out, const TextIndex& index, const std::string& word, const findopts_t& options)
+    {
+      if (!index.has(word)) {
+        out << "<EMPTY>\n";
+        return;
+      }
+      printMatches(out, index, word, options);
+    }
+
+    void cmdFindFirst(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      std::size_t count = 0;
+      in >> id >> word >> count;
+      requireStream(in);
+      const findopts_t options = { count, false, Edge::both, 0 };
+      emitScoped(out, requireDoc(docs, id), word, options);
+    }
+
+    void cmdFindLast(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      std::size_t count = 0;
+      in >> id >> word >> count;
+      requireStream(in);
+      const findopts_t options = { count, true, Edge::both, 0 };
+      emitScoped(out, requireDoc(docs, id), word, options);
+    }
+
+    void cmdFindAround(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      std::size_t context = 0;
+      in >> id >> word >> context;
+      requireStream(in);
+      const findopts_t options = { std::numeric_limits< std::size_t >::max(), false, Edge::both, context };
+      emitScoped(out, requireDoc(docs, id), word, options);
+    }
+
+    void cmdFindCount(std::istream& in, std::ostream& out, Documents& docs)
+    {
+      std::string id;
+      std::string word;
+      in >> id >> word;
+      requireStream(in);
+      const TextIndex& index = requireDoc(docs, id);
+      const std::size_t total = index.has(word) ? listSize(index.positions(word)) : 0;
+      out << total << "\n";
+    }
+
     void cmdDumpIndex(std::istream& in, std::ostream& out, Documents& docs)
     {
       std::string id;
@@ -480,6 +533,10 @@ namespace samarin {
       commands.add("reverse-words", &cmdReverseWords);
       commands.add("transpose", &cmdTranspose);
       commands.add("find", &cmdFind);
+      commands.add("find-first", &cmdFindFirst);
+      commands.add("find-last", &cmdFindLast);
+      commands.add("find-around", &cmdFindAround);
+      commands.add("find-count", &cmdFindCount);
       commands.add("dump-index", &cmdDumpIndex);
       return commands;
     }
