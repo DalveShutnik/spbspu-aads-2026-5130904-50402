@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 namespace samarin {
@@ -257,7 +258,16 @@ namespace samarin {
 
     bool contains(const Key & key) const
     {
-      return find(key) != cend();
+      return findNode(key) != nullptr;
+    }
+
+    Value get(const Key & key) const
+    {
+      const detail::TreeNode< Key, Value > * node = findNode(key);
+      if (node == nullptr) {
+        throw std::out_of_range("no such key");
+      }
+      return node->data.second;
     }
 
     bool empty() const
@@ -274,6 +284,21 @@ namespace samarin {
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
     Compare cmp_;
+
+    detail::TreeNode< Key, Value > * findNode(const Key & key) const
+    {
+      detail::TreeNode< Key, Value > * cur = root_;
+      while (cur != nullptr) {
+        if (cmp_(key, cur->data.first)) {
+          cur = cur->left;
+        } else if (cmp_(cur->data.first, key)) {
+          cur = cur->right;
+        } else {
+          return cur;
+        }
+      }
+      return nullptr;
+    }
 
     static detail::TreeNode< Key, Value > * makeNode(const Key & key, const Value & value,
         detail::TreeNode< Key, Value > * parent)
