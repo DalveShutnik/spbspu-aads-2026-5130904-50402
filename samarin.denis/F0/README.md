@@ -1,30 +1,30 @@
-# F0 — Cross-references. Text indexing
+# F0 — Перекрёстные ссылки. Индексация текста
 
-A text is loaded and immediately turned into an inverted index (word to
-positions); the original text is dropped. Every other command works on the
-index: it is restored to a grid of lines and words, transformed, and indexed
-again. Cross-references are answered straight from the index.
+Текст загружается и сразу превращается в инвертированный индекс (слово —
+список позиций), оригинал отбрасывается. Все остальные команды работают с
+индексом: он восстанавливается в сетку строк и слов, преобразуется и
+индексируется заново. Перекрёстные ссылки выдаются прямо из индекса.
 
-## Data structures
+## Структуры данных
 
-- `List` (S1) — singly linked list, stored in `common`.
-- `Stack`, `Queue` (S2) — built on top of `List`.
-- `CuckooTable` (S3) — hash table using cuckoo hashing with two hash
-  functions; it stores the inverted index, the document collection and the
-  command table.
+- `List` (S1) — односвязный список, лежит в `common`.
+- `Stack`, `Queue` (S2) — построены поверх `List`.
+- `CuckooTable` (S3) — хэш-таблица на кукушкином хэшировании с двумя хэш-
+  функциями; хранит инвертированный индекс, коллекцию документов и таблицу
+  команд.
 
-## Commands
+## Команды
 
-Indices that name a line or a word are 1-based.
+Номера строк и слов начинаются с единицы.
 
 ```
-load <file> <id>            build the index for a file
-save <id> <file>            restore the text and write it
-list                        list document ids
-show <id>                   print the restored text
-drop <id>                   remove a document
-help                        list commands
-exit                        stop
+load <file> <id>            построить индекс по файлу
+save <id> <file>            восстановить текст и сохранить
+list                        вывести идентификаторы документов
+show <id>                   вывести восстановленный текст
+drop <id>                   удалить документ
+help                        вывести список команд
+exit                        завершить работу
 
 replace <id> <line> <word> <new>
 swap <id> <line1> <word1> <line2> <word2>
@@ -45,5 +45,5 @@ find <id> <word> [--limit=k] [--from=start|end] [--edge=left|right] [--context=k
 dump-index <id>
 ```
 
-Commands are read from standard input; an invalid command prints
+Команды читаются из стандартного ввода; на некорректную команду выводится
 `<INVALID COMMAND>`.
