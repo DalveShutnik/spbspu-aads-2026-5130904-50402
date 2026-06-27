@@ -35,7 +35,8 @@ namespace samarin {
 int main()
 {
   using namespace samarin;
-  auto data = readInput< int >(std::cin);
+  using Number = unsigned long long;
+  auto data = readInput< Number >(std::cin);
 
   if (data.empty()) {
     std::cout << "0\n";
@@ -52,35 +53,35 @@ int main()
   }
   std::cout << "\n";
 
-  List< LCIter< int > > positions;
+  List< LCIter< Number > > positions;
   {
-    LIter< LCIter< int > > posTail = positions.before_begin();
+    LIter< LCIter< Number > > posTail = positions.before_begin();
     for (auto it = data.cbegin(); it != data.cend(); ++it) {
       posTail = positions.insert_after(posTail, it->second.cbegin());
     }
   }
 
-  List< int > sums;
-  LIter< int > sumsTail = sums.before_begin();
+  List< Number > sums;
+  LIter< Number > sumsTail = sums.before_begin();
 
-  const LCIter< int > endMarker;
+  const LCIter< Number > endMarker;
   bool anyRemaining = true;
   while (anyRemaining) {
     anyRemaining = false;
     bool lineStarted = false;
-    int sum = 0;
+    Number sum = 0;
 
     for (auto pit = positions.begin(); pit != positions.end(); ++pit) {
       if (*pit != endMarker) {
         anyRemaining = true;
-        const int val = **pit;
+        const Number val = **pit;
         if (lineStarted) {
           std::cout << " ";
         }
         std::cout << val;
         lineStarted = true;
 
-        if (val > 0 && sum > std::numeric_limits< int >::max() - val) {
+        if (val > 0 && sum > std::numeric_limits< Number >::max() - val) {
           std::cerr << "overflow" << "\n";
           return 1;
         }
@@ -96,7 +97,9 @@ int main()
     }
   }
 
-  if (!sums.empty()) {
+  if (sums.empty()) {
+    std::cout << "0\n";
+  } else {
     first = true;
     for (auto it = sums.cbegin(); it != sums.cend(); ++it) {
       if (!first) {
