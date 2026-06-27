@@ -260,6 +260,16 @@ namespace samarin {
       return find(key) != cend();
     }
 
+    bool empty() const
+    {
+      return size_ == 0;
+    }
+
+    std::size_t size() const
+    {
+      return size_;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
