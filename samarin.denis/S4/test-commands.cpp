@@ -58,7 +58,8 @@ BOOST_AUTO_TEST_CASE(reader_skips_blank_lines)
 
 BOOST_AUTO_TEST_CASE(set_operations_match_spec)
 {
-  samarin::DatasetCollection datasets = load("first 1 name 2 surname\nsecond 4 mouse 1 name 2 keyboard\n");
+  samarin::DatasetCollection datasets =
+      load("first 1 name 2 surname\nsecond 4 mouse 1 name 2 keyboard\n");
   const std::string out = run(datasets,
       "complement third second first\nprint third\n"
       "intersect fourth first second\nprint fourth\n"
