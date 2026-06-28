@@ -103,4 +103,9 @@ BOOST_AUTO_TEST_CASE(find_first_and_last)
   BOOST_TEST(run("load f0_test_sample.txt d\nfind-last d the 1\nexit\n") == "2 1: [the]\n");
 }
 
+BOOST_AUTO_TEST_CASE(find_around)
+{
+  BOOST_TEST(run("load f0_test_sample.txt d\nfind-around d cat 1\nexit\n") == "1 2: the [cat] sat\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
