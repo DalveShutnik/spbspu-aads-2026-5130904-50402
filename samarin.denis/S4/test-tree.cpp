@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
+#include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include "tree.hpp"
 
 namespace {
