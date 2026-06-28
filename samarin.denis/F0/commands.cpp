@@ -350,26 +350,26 @@ namespace samarin {
       }
     }
 
-    List< position_t > collectSequence(const PostingList& source, bool fromEnd)
+    List< Position > collectSequence(const PostingList& source, bool fromEnd)
     {
-      List< position_t > ordered = source;
+      List< Position > ordered = source;
       listSort(ordered);
       if (!fromEnd) {
         return ordered;
       }
-      List< position_t > reversed;
-      Stack< position_t > stack;
-      for (LCIter< position_t > it = ordered.cbegin(); it != ordered.cend(); ++it) {
+      List< Position > reversed;
+      Stack< Position > stack;
+      for (LCIter< Position > it = ordered.cbegin(); it != ordered.cend(); ++it) {
         stack.push(*it);
       }
-      LIter< position_t > tail = reversed.before_begin();
+      LIter< Position > tail = reversed.before_begin();
       while (!stack.empty()) {
         tail = reversed.insert_after(tail, stack.drop());
       }
       return reversed;
     }
 
-    void printContext(std::ostream& out, const Line& line, const position_t& pos, const findopts_t& options)
+    void printContext(std::ostream& out, const Line& line, const Position& pos, const findopts_t& options)
     {
       std::size_t lo = pos.word;
       std::size_t hi = pos.word;
@@ -407,10 +407,10 @@ namespace samarin {
 
     void printMatches(std::ostream& out, const TextIndex& index, const std::string& word, const findopts_t& options)
     {
-      const List< position_t > sequence = collectSequence(index.positions(word), options.fromEnd);
+      const List< Position > sequence = collectSequence(index.positions(word), options.fromEnd);
       const Text text = index.restore();
       std::size_t shown = 0;
-      for (LCIter< position_t > it = sequence.cbegin(); it != sequence.cend() && shown < options.limit; ++it) {
+      for (LCIter< Position > it = sequence.cbegin(); it != sequence.cend() && shown < options.limit; ++it) {
         printContext(out, listAt(text, it->line), *it, options);
         ++shown;
       }
@@ -501,9 +501,9 @@ namespace samarin {
       }
       for (LCIter< std::string > word = words.cbegin(); word != words.cend(); ++word) {
         out << *word << ":";
-        List< position_t > positions = index.positions(*word);
+        List< Position > positions = index.positions(*word);
         listSort(positions);
-        for (LCIter< position_t > p = positions.cbegin(); p != positions.cend(); ++p) {
+        for (LCIter< Position > p = positions.cbegin(); p != positions.cend(); ++p) {
           out << " (" << (p->line + 1) << "," << (p->word + 1) << ")";
         }
         out << "\n";
