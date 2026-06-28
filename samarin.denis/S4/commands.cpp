@@ -40,7 +40,36 @@ namespace samarin {
     out << "\n";
   }
 
-  static void cmdComplement(std::istream & in, std::ostream &, DatasetCollection & datasets)
+  enum class SetOp {
+    complement,
+    intersect,
+    unite
+  };
+
+  static Dataset combine(const Dataset & left, const Dataset & right, SetOp op)
+  {
+    Dataset result;
+    if (op == SetOp::unite) {
+      for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
+        result.push(it->first, it->second);
+      }
+      for (Dataset::const_iterator it = right.cbegin(); it != right.cend(); ++it) {
+        if (!left.contains(it->first)) {
+          result.push(it->first, it->second);
+        }
+      }
+      return result;
+    }
+    const bool wantShared = op == SetOp::intersect;
+    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
+      if (right.contains(it->first) == wantShared) {
+        result.push(it->first, it->second);
+      }
+    }
+    return result;
+  }
+
+  static void runSetOp(std::istream & in, DatasetCollection & datasets, SetOp op)
   {
     std::string target;
     std::string first;
@@ -50,54 +79,23 @@ namespace samarin {
     }
     const Dataset & left = requireDataset(datasets, first);
     const Dataset & right = requireDataset(datasets, second);
-    Dataset result;
-    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
-      if (!right.contains(it->first)) {
-        result.push(it->first, it->second);
-      }
-    }
+    Dataset result = combine(left, right, op);
     datasets.push(target, result);
+  }
+
+  static void cmdComplement(std::istream & in, std::ostream &, DatasetCollection & datasets)
+  {
+    runSetOp(in, datasets, SetOp::complement);
   }
 
   static void cmdIntersect(std::istream & in, std::ostream &, DatasetCollection & datasets)
   {
-    std::string target;
-    std::string first;
-    std::string second;
-    if (!(in >> target >> first >> second)) {
-      throw std::logic_error("missing operands");
-    }
-    const Dataset & left = requireDataset(datasets, first);
-    const Dataset & right = requireDataset(datasets, second);
-    Dataset result;
-    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
-      if (right.contains(it->first)) {
-        result.push(it->first, it->second);
-      }
-    }
-    datasets.push(target, result);
+    runSetOp(in, datasets, SetOp::intersect);
   }
 
   static void cmdUnion(std::istream & in, std::ostream &, DatasetCollection & datasets)
   {
-    std::string target;
-    std::string first;
-    std::string second;
-    if (!(in >> target >> first >> second)) {
-      throw std::logic_error("missing operands");
-    }
-    const Dataset & left = requireDataset(datasets, first);
-    const Dataset & right = requireDataset(datasets, second);
-    Dataset result;
-    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
-      result.push(it->first, it->second);
-    }
-    for (Dataset::const_iterator it = right.cbegin(); it != right.cend(); ++it) {
-      if (!left.contains(it->first)) {
-        result.push(it->first, it->second);
-      }
-    }
-    datasets.push(target, result);
+    runSetOp(in, datasets, SetOp::unite);
   }
 
   static CommandTable makeCommands()
