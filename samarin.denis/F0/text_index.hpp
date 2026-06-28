@@ -10,7 +10,7 @@
 
 namespace samarin {
 
-  using PostingList = List< position_t >;
+  using PostingList = List< Position >;
   using PostingsTable = CuckooTable< std::string, PostingList, StringHash >;
 
   class TextIndex {
