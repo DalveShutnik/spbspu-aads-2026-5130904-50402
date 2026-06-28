@@ -97,4 +97,10 @@ BOOST_AUTO_TEST_CASE(find_count)
   BOOST_TEST(run("load f0_test_sample.txt d\nfind-count d missing\nexit\n") == "0\n");
 }
 
+BOOST_AUTO_TEST_CASE(find_first_and_last)
+{
+  BOOST_TEST(run("load f0_test_sample.txt d\nfind-first d the 1\nexit\n") == "1 1: [the]\n");
+  BOOST_TEST(run("load f0_test_sample.txt d\nfind-last d the 1\nexit\n") == "2 1: [the]\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
