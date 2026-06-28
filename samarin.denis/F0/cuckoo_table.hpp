@@ -352,7 +352,7 @@ namespace samarin {
       std::size_t pos = home1(cur.first);
       const std::size_t limit = maxKicks();
       for (std::size_t kick = 0; kick < limit; ++kick) {
-        if (!slots_[pos].occupied) {
+        if (slotFree(pos)) {
           slots_[pos].data = cur;
           slots_[pos].occupied = true;
           return true;
