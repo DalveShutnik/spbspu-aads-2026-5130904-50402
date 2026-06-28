@@ -295,12 +295,12 @@ namespace samarin {
 
     std::size_t home1(const Key& key) const
     {
-      return hash_(key) % capacity_;
+      return indexOf(hash_(key));
     }
 
     std::size_t home2(const Key& key) const
     {
-      return detail::cuckooMix(hash_(key)) % capacity_;
+      return indexOf(detail::cuckooMix(hash_(key)));
     }
 
     bool wouldOverload(std::size_t extra) const
@@ -331,11 +331,11 @@ namespace samarin {
     std::size_t locate(const Key& key) const
     {
       const std::size_t base = hash_(key);
-      const std::size_t first = base % capacity_;
+      const std::size_t first = indexOf(base);
       if (slotMatches(first, key)) {
         return first;
       }
-      const std::size_t second = detail::cuckooMix(base) % capacity_;
+      const std::size_t second = indexOf(detail::cuckooMix(base));
       if (slotMatches(second, key)) {
         return second;
       }
