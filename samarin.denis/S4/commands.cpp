@@ -59,11 +59,31 @@ namespace samarin {
     datasets.push(target, result);
   }
 
+  static void cmdIntersect(std::istream & in, std::ostream &, DatasetCollection & datasets)
+  {
+    std::string target;
+    std::string first;
+    std::string second;
+    if (!(in >> target >> first >> second)) {
+      throw std::logic_error("missing operands");
+    }
+    const Dataset & left = requireDataset(datasets, first);
+    const Dataset & right = requireDataset(datasets, second);
+    Dataset result;
+    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
+      if (right.contains(it->first)) {
+        result.push(it->first, it->second);
+      }
+    }
+    datasets.push(target, result);
+  }
+
   static CommandTable makeCommands()
   {
     CommandTable commands;
     commands.push("print", &cmdPrint);
     commands.push("complement", &cmdComplement);
+    commands.push("intersect", &cmdIntersect);
     return commands;
   }
 
