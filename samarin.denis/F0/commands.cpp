@@ -321,14 +321,23 @@ namespace samarin {
       return value;
     }
 
+    bool matchFlag(const std::string& flag, const std::string& prefix, std::string& value)
+    {
+      if (!startsWith(flag, prefix)) {
+        return false;
+      }
+      value = flag.substr(prefix.size());
+      return true;
+    }
+
     void parseFlag(const std::string& flag, findopts_t& options)
     {
-      if (startsWith(flag, "--limit=")) {
-        options.limit = parseSize(flag.substr(std::string("--limit=").size()));
-      } else if (startsWith(flag, "--context=")) {
-        options.context = parseSize(flag.substr(std::string("--context=").size()));
-      } else if (startsWith(flag, "--from=")) {
-        const std::string value = flag.substr(std::string("--from=").size());
+      std::string value;
+      if (matchFlag(flag, "--limit=", value)) {
+        options.limit = parseSize(value);
+      } else if (matchFlag(flag, "--context=", value)) {
+        options.context = parseSize(value);
+      } else if (matchFlag(flag, "--from=", value)) {
         if (value == "start") {
           options.fromEnd = false;
         } else if (value == "end") {
@@ -336,8 +345,7 @@ namespace samarin {
         } else {
           throw std::logic_error("bad from");
         }
-      } else if (startsWith(flag, "--edge=")) {
-        const std::string value = flag.substr(std::string("--edge=").size());
+      } else if (matchFlag(flag, "--edge=", value)) {
         if (value == "left") {
           options.edge = Edge::left;
         } else if (value == "right") {
