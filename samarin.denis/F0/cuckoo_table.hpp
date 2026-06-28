@@ -288,6 +288,11 @@ namespace samarin {
       std::swap(equal_, other.equal_);
     }
 
+    std::size_t indexOf(std::size_t hashValue) const
+    {
+      return hashValue % capacity_;
+    }
+
     std::size_t home1(const Key& key) const
     {
       return hash_(key) % capacity_;
