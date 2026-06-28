@@ -323,6 +323,11 @@ namespace samarin {
       return bound * 4 + 4;
     }
 
+    bool slotFree(std::size_t index) const
+    {
+      return !slots_[index].occupied;
+    }
+
     bool slotMatches(std::size_t index, const Key& key) const
     {
       return slots_[index].occupied && equal_(slots_[index].data.first, key);
