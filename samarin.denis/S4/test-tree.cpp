@@ -175,3 +175,78 @@ BOOST_AUTO_TEST_CASE(height_measures_subtree)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+namespace {
+  std::string inorder(const Tree & tree)
+  {
+    std::string keys;
+    for (Tree::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+      keys += it->second;
+    }
+    return keys;
+  }
+}
+
+BOOST_AUTO_TEST_SUITE(rotation_tests)
+
+BOOST_AUTO_TEST_CASE(rotate_right_keeps_order_and_refs)
+{
+  Tree tree;
+  tree.push(5, "e");
+  tree.push(3, "c");
+  tree.push(8, "h");
+  tree.push(1, "a");
+  tree.push(4, "d");
+  const std::string * before = std::addressof(tree.find(5)->second);
+  Tree::const_iterator risen = tree.rotateRight(tree.find(3));
+  BOOST_TEST(risen->first == 3);
+  BOOST_TEST(inorder(tree) == "acdeh");
+  BOOST_TEST(std::addressof(tree.find(5)->second) == before);
+  BOOST_TEST(tree.height() == 3u);
+}
+
+BOOST_AUTO_TEST_CASE(rotate_left_keeps_order)
+{
+  Tree tree;
+  tree.push(5, "e");
+  tree.push(8, "h");
+  tree.push(3, "c");
+  tree.push(6, "f");
+  tree.push(9, "i");
+  Tree::const_iterator risen = tree.rotateLeft(tree.find(8));
+  BOOST_TEST(risen->first == 8);
+  BOOST_TEST(inorder(tree) == "cefhi");
+}
+
+BOOST_AUTO_TEST_CASE(rotate_large_right_lifts_grandchild)
+{
+  Tree tree;
+  tree.push(8, "h");
+  tree.push(3, "c");
+  tree.push(5, "e");
+  Tree::const_iterator risen = tree.rotateLargeRight(tree.find(5));
+  BOOST_TEST(risen->first == 5);
+  BOOST_TEST(inorder(tree) == "ceh");
+  BOOST_TEST(tree.height() == 2u);
+}
+
+BOOST_AUTO_TEST_CASE(rotate_large_left_lifts_grandchild)
+{
+  Tree tree;
+  tree.push(3, "c");
+  tree.push(8, "h");
+  tree.push(5, "e");
+  Tree::const_iterator risen = tree.rotateLargeLeft(tree.find(5));
+  BOOST_TEST(risen->first == 5);
+  BOOST_TEST(inorder(tree) == "ceh");
+  BOOST_TEST(tree.height() == 2u);
+}
+
+BOOST_AUTO_TEST_CASE(rotate_root_throws)
+{
+  Tree tree;
+  tree.push(1, "a");
+  BOOST_CHECK_THROW(tree.rotateRight(tree.find(1)), std::logic_error);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
