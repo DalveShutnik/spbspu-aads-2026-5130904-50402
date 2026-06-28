@@ -26,8 +26,6 @@ namespace samarin {
     }
   };
 
-  using position_t = Position;
-
   Text parseText(std::istream& in);
   void writeText(std::ostream& out, const Text& text);
 
