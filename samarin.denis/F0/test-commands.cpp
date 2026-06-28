@@ -91,4 +91,10 @@ BOOST_AUTO_TEST_CASE(empty_list)
   BOOST_TEST(run("list\nexit\n") == "<EMPTY>\n");
 }
 
+BOOST_AUTO_TEST_CASE(find_count)
+{
+  BOOST_TEST(run("load f0_test_sample.txt d\nfind-count d the\nexit\n") == "2\n");
+  BOOST_TEST(run("load f0_test_sample.txt d\nfind-count d missing\nexit\n") == "0\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
