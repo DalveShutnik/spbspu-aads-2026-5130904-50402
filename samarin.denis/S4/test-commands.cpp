@@ -56,4 +56,22 @@ BOOST_AUTO_TEST_CASE(reader_skips_blank_lines)
   BOOST_TEST(out == "first 1 a\nsecond 2 b\n");
 }
 
+BOOST_AUTO_TEST_CASE(set_operations_match_spec)
+{
+  samarin::DatasetCollection datasets = load("first 1 name 2 surname\nsecond 4 mouse 1 name 2 keyboard\n");
+  const std::string out = run(datasets,
+      "complement third second first\nprint third\n"
+      "intersect fourth first second\nprint fourth\n"
+      "intersect yafourth second first\nprint yafourth\n"
+      "union fifth first second\nprint fifth\n"
+      "union yafifth second first\nprint yafifth\n");
+  const std::string expected =
+      "third 4 mouse\n"
+      "fourth 1 name 2 surname\n"
+      "yafourth 1 name 2 keyboard\n"
+      "fifth 1 name 2 surname 4 mouse\n"
+      "yafifth 1 name 2 keyboard 4 mouse\n";
+  BOOST_TEST(out == expected);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
