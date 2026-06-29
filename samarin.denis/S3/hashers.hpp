@@ -7,8 +7,6 @@
 
 namespace samarin {
 
-  std::size_t hashBytes(const char* data, std::size_t size);
-
   struct StringHash {
     std::size_t operator()(const std::string& key) const;
   };
