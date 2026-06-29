@@ -290,6 +290,42 @@ namespace samarin {
       return heightOf(it.node_);
     }
 
+    const_iterator rotateRight(const_iterator it)
+    {
+      detail::TreeNode< Key, Value > * pivot = nodeOf(it);
+      if (pivot == nullptr || pivot->parent == nullptr || pivot->parent->left != pivot) {
+        throw std::logic_error("invalid right rotation");
+      }
+      detail::TreeNode< Key, Value > * parent = pivot->parent;
+      detail::TreeNode< Key, Value > * middle = pivot->right;
+      transplant(parent, pivot);
+      pivot->right = parent;
+      parent->parent = pivot;
+      parent->left = middle;
+      if (middle != nullptr) {
+        middle->parent = parent;
+      }
+      return const_iterator(pivot);
+    }
+
+    const_iterator rotateLeft(const_iterator it)
+    {
+      detail::TreeNode< Key, Value > * pivot = nodeOf(it);
+      if (pivot == nullptr || pivot->parent == nullptr || pivot->parent->right != pivot) {
+        throw std::logic_error("invalid left rotation");
+      }
+      detail::TreeNode< Key, Value > * parent = pivot->parent;
+      detail::TreeNode< Key, Value > * middle = pivot->left;
+      transplant(parent, pivot);
+      pivot->left = parent;
+      parent->parent = pivot;
+      parent->right = middle;
+      if (middle != nullptr) {
+        middle->parent = parent;
+      }
+      return const_iterator(pivot);
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
@@ -308,6 +344,25 @@ namespace samarin {
         }
       }
       return nullptr;
+    }
+
+    static detail::TreeNode< Key, Value > * nodeOf(const_iterator it)
+    {
+      return const_cast< detail::TreeNode< Key, Value > * >(it.node_);
+    }
+
+    void transplant(detail::TreeNode< Key, Value > * target, detail::TreeNode< Key, Value > * replacement)
+    {
+      if (target->parent == nullptr) {
+        root_ = replacement;
+      } else if (target == target->parent->left) {
+        target->parent->left = replacement;
+      } else {
+        target->parent->right = replacement;
+      }
+      if (replacement != nullptr) {
+        replacement->parent = target->parent;
+      }
     }
 
     static detail::TreeNode< Key, Value > * makeNode(const Key & key, const Value & value,
