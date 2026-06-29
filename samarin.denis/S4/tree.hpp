@@ -16,6 +16,15 @@ namespace samarin {
       TreeNode< Key, Value > * right;
       TreeNode< Key, Value > * parent;
     };
+
+    template< class Node >
+    Node * leftmost(Node * node)
+    {
+      while (node != nullptr && node->left != nullptr) {
+        node = node->left;
+      }
+      return node;
+    }
   }
 
 }
