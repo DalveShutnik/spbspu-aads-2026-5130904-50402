@@ -280,6 +280,16 @@ namespace samarin {
       return size_;
     }
 
+    std::size_t height() const
+    {
+      return heightOf(root_);
+    }
+
+    std::size_t height(const_iterator it) const
+    {
+      return heightOf(it.node_);
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
@@ -331,6 +341,16 @@ namespace samarin {
       destroy(node->left);
       destroy(node->right);
       delete node;
+    }
+
+    static std::size_t heightOf(const detail::TreeNode< Key, Value > * node)
+    {
+      if (node == nullptr) {
+        return 0;
+      }
+      const std::size_t left = heightOf(node->left);
+      const std::size_t right = heightOf(node->right);
+      return 1 + (left > right ? left : right);
     }
   };
 
