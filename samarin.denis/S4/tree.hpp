@@ -174,6 +174,15 @@ namespace samarin {
       destroy(root_);
     }
 
+    BSTree< Key, Value, Compare > & operator=(const BSTree< Key, Value, Compare > & other)
+    {
+      if (this != std::addressof(other)) {
+        BSTree< Key, Value, Compare > tmp(other);
+        swap(tmp);
+      }
+      return *this;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
