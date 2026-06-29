@@ -372,6 +372,13 @@ namespace samarin {
       size_ = 0;
     }
 
+    void swap(BSTree< Key, Value, Compare > & other) noexcept
+    {
+      std::swap(root_, other.root_);
+      std::swap(size_, other.size_);
+      std::swap(cmp_, other.cmp_);
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
