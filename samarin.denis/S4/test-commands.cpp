@@ -49,4 +49,11 @@ BOOST_AUTO_TEST_CASE(missing_dataset_is_invalid)
   BOOST_TEST(run(datasets, "print b\n") == "<INVALID COMMAND>\n");
 }
 
+BOOST_AUTO_TEST_CASE(reader_skips_blank_lines)
+{
+  samarin::DatasetCollection datasets = load("\nfirst 1 a\n\nsecond 2 b\n\n");
+  const std::string out = run(datasets, "print first\nprint second\n");
+  BOOST_TEST(out == "first 1 a\nsecond 2 b\n");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
