@@ -225,6 +225,36 @@ namespace samarin {
       ++size_;
     }
 
+    iterator find(const Key & key)
+    {
+      detail::TreeNode< Key, Value > * cur = root_;
+      while (cur != nullptr) {
+        if (cmp_(key, cur->data.first)) {
+          cur = cur->left;
+        } else if (cmp_(cur->data.first, key)) {
+          cur = cur->right;
+        } else {
+          return iterator(cur);
+        }
+      }
+      return end();
+    }
+
+    const_iterator find(const Key & key) const
+    {
+      const detail::TreeNode< Key, Value > * cur = root_;
+      while (cur != nullptr) {
+        if (cmp_(key, cur->data.first)) {
+          cur = cur->left;
+        } else if (cmp_(cur->data.first, key)) {
+          cur = cur->right;
+        } else {
+          return const_iterator(cur);
+        }
+      }
+      return cend();
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
