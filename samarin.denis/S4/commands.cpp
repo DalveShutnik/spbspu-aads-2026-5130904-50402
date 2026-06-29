@@ -78,12 +78,35 @@ namespace samarin {
     datasets.push(target, result);
   }
 
+  static void cmdUnion(std::istream & in, std::ostream &, DatasetCollection & datasets)
+  {
+    std::string target;
+    std::string first;
+    std::string second;
+    if (!(in >> target >> first >> second)) {
+      throw std::logic_error("missing operands");
+    }
+    const Dataset & left = requireDataset(datasets, first);
+    const Dataset & right = requireDataset(datasets, second);
+    Dataset result;
+    for (Dataset::const_iterator it = left.cbegin(); it != left.cend(); ++it) {
+      result.push(it->first, it->second);
+    }
+    for (Dataset::const_iterator it = right.cbegin(); it != right.cend(); ++it) {
+      if (!left.contains(it->first)) {
+        result.push(it->first, it->second);
+      }
+    }
+    datasets.push(target, result);
+  }
+
   static CommandTable makeCommands()
   {
     CommandTable commands;
     commands.push("print", &cmdPrint);
     commands.push("complement", &cmdComplement);
     commands.push("intersect", &cmdIntersect);
+    commands.push("union", &cmdUnion);
     return commands;
   }
 
