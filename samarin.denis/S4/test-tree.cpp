@@ -59,4 +59,60 @@ BOOST_AUTO_TEST_CASE(contains_reports_membership)
   BOOST_TEST(!tree.contains(11));
 }
 
+BOOST_AUTO_TEST_CASE(drop_returns_value_and_keeps_order)
+{
+  Tree tree;
+  tree.push(5, "e");
+  tree.push(3, "c");
+  tree.push(8, "h");
+  tree.push(1, "a");
+  tree.push(4, "d");
+  BOOST_TEST(tree.drop(3) == "c");
+  BOOST_TEST(!tree.contains(3));
+  BOOST_TEST(tree.size() == 4u);
+  std::string keys;
+  for (Tree::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+    keys += it->second;
+  }
+  BOOST_TEST(keys == "adeh");
+}
+
+BOOST_AUTO_TEST_CASE(drop_missing_throws)
+{
+  Tree tree;
+  tree.push(1, "a");
+  BOOST_CHECK_THROW(tree.drop(2), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_CASE(drop_leaf_and_single_child)
+{
+  Tree tree;
+  tree.push(5, "e");
+  tree.push(3, "c");
+  tree.push(8, "h");
+  tree.push(2, "b");
+  tree.drop(2);
+  tree.drop(3);
+  std::string keys;
+  for (Tree::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+    keys += it->second;
+  }
+  BOOST_TEST(keys == "eh");
+  BOOST_TEST(tree.size() == 2u);
+}
+
+BOOST_AUTO_TEST_CASE(drop_root_with_two_children)
+{
+  Tree tree;
+  tree.push(5, "e");
+  tree.push(3, "c");
+  tree.push(8, "h");
+  BOOST_TEST(tree.drop(5) == "e");
+  std::string keys;
+  for (Tree::const_iterator it = tree.cbegin(); it != tree.cend(); ++it) {
+    keys += it->second;
+  }
+  BOOST_TEST(keys == "ch");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
