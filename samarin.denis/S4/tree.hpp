@@ -326,6 +326,18 @@ namespace samarin {
       return const_iterator(pivot);
     }
 
+    const_iterator rotateLargeRight(const_iterator it)
+    {
+      rotateLeft(it);
+      return rotateRight(it);
+    }
+
+    const_iterator rotateLargeLeft(const_iterator it)
+    {
+      rotateRight(it);
+      return rotateLeft(it);
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
