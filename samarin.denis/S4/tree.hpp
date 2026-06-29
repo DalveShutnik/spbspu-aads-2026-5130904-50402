@@ -160,6 +160,15 @@ namespace samarin {
       cmp_(other.cmp_)
     {}
 
+    BSTree(BSTree< Key, Value, Compare > && other) noexcept:
+      root_(other.root_),
+      size_(other.size_),
+      cmp_(std::move(other.cmp_))
+    {
+      other.root_ = nullptr;
+      other.size_ = 0;
+    }
+
     ~BSTree()
     {
       destroy(root_);
