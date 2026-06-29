@@ -2,7 +2,6 @@
 #define TABLE_UTILS_HPP
 
 #include <cstddef>
-#include <stdexcept>
 
 namespace samarin {
 
@@ -22,14 +21,7 @@ namespace samarin {
     if (!table.has(key)) {
       growIfLoaded(table, 1);
     }
-    while (true) {
-      try {
-        table.add(key, value);
-        return;
-      } catch (const std::length_error&) {
-        table.rehash(table.capacity() * 2);
-      }
-    }
+    table.add(key, value);
   }
 
   template< class Table, class Key >
@@ -38,13 +30,7 @@ namespace samarin {
     if (!table.has(key)) {
       growIfLoaded(table, 1);
     }
-    while (true) {
-      try {
-        return table[key];
-      } catch (const std::length_error&) {
-        table.rehash(table.capacity() * 2);
-      }
-    }
+    return table[key];
   }
 
 }
