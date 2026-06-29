@@ -50,14 +50,6 @@ BOOST_AUTO_TEST_CASE(drop_missing_throws)
   BOOST_CHECK_THROW(table.drop("none"), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_CASE(full_table_throws)
-{
-  samarin::HashTable< std::string, int, samarin::StringHash > table(2);
-  table.add("a", 1);
-  table.add("b", 2);
-  BOOST_CHECK_THROW(table.add("c", 3), std::length_error);
-}
-
 BOOST_AUTO_TEST_CASE(rehash_keeps_entries)
 {
   samarin::HashTable< std::string, int, samarin::StringHash > table(2);
@@ -71,7 +63,7 @@ BOOST_AUTO_TEST_CASE(rehash_keeps_entries)
   BOOST_TEST(table.size() == 3u);
 }
 
-BOOST_AUTO_TEST_CASE(reuse_deleted_slot)
+BOOST_AUTO_TEST_CASE(add_after_drop)
 {
   samarin::HashTable< std::string, int, samarin::StringHash > table(2);
   table.add("a", 1);

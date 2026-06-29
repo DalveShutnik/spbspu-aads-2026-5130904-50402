@@ -3,22 +3,17 @@
 
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
 namespace samarin {
 
   namespace detail {
-    enum class SlotState {
-      empty,
-      occupied,
-      deleted
-    };
-
     template< class Key, class Value >
-    struct Entry {
+    struct BucketNode {
       std::pair< Key, Value > data;
-      SlotState state = SlotState::empty;
+      BucketNode< Key, Value > * next;
     };
   }
 
@@ -30,18 +25,18 @@ namespace samarin {
   public:
     const std::pair< Key, Value >& operator*() const
     {
-      return slots_[index_].data;
+      return node_->data;
     }
 
     const std::pair< Key, Value >* operator->() const
     {
-      return std::addressof(slots_[index_].data);
+      return std::addressof(node_->data);
     }
 
     HashConstIterator< Key, Value >& operator++()
     {
-      ++index_;
-      skip();
+      node_ = node_->next;
+      advance();
       return *this;
     }
 
@@ -54,34 +49,37 @@ namespace samarin {
 
     bool operator==(const HashConstIterator< Key, Value >& other) const
     {
-      return index_ == other.index_;
+      return node_ == other.node_;
     }
 
     bool operator!=(const HashConstIterator< Key, Value >& other) const
     {
-      return index_ != other.index_;
+      return node_ != other.node_;
     }
 
   private:
     template< class K, class V, class H, class E >
     friend class HashTable;
 
-    const detail::Entry< Key, Value >* slots_;
-    std::size_t capacity_;
-    std::size_t index_;
+    using Node = detail::BucketNode< Key, Value >;
 
-    HashConstIterator(const detail::Entry< Key, Value >* slots, std::size_t capacity, std::size_t index):
-      slots_(slots),
-      capacity_(capacity),
-      index_(index)
-    {
-      skip();
-    }
+    Node * const * buckets_;
+    std::size_t bucketCount_;
+    std::size_t bucket_;
+    const Node * node_;
 
-    void skip()
+    HashConstIterator(Node * const * buckets, std::size_t count, std::size_t bucket, const Node * node):
+      buckets_(buckets),
+      bucketCount_(count),
+      bucket_(bucket),
+      node_(node)
+    {}
+
+    void advance()
     {
-      while (index_ < capacity_ && slots_[index_].state != detail::SlotState::occupied) {
-        ++index_;
+      while (node_ == nullptr && bucket_ + 1 < bucketCount_) {
+        ++bucket_;
+        node_ = buckets_[bucket_];
       }
     }
   };
@@ -92,49 +90,53 @@ namespace samarin {
     using const_iterator = HashConstIterator< Key, Value >;
 
     HashTable():
-      slots_(new detail::Entry< Key, Value >[default_capacity]),
-      capacity_(default_capacity),
+      buckets_(new Node *[default_bucket_count]()),
+      bucketCount_(default_bucket_count),
       size_(0)
     {}
 
-    explicit HashTable(std::size_t slots):
-      slots_(new detail::Entry< Key, Value >[atLeastMin(slots)]),
-      capacity_(atLeastMin(slots)),
+    explicit HashTable(std::size_t buckets):
+      buckets_(new Node *[atLeastMin(buckets)]()),
+      bucketCount_(atLeastMin(buckets)),
       size_(0)
     {}
 
     HashTable(const HashTable< Key, Value, Hash, Equal >& other):
-      slots_(new detail::Entry< Key, Value >[other.capacity_]),
-      capacity_(other.capacity_),
-      size_(other.size_),
+      buckets_(new Node *[other.bucketCount_]()),
+      bucketCount_(other.bucketCount_),
+      size_(0),
       hash_(other.hash_),
       equal_(other.equal_)
     {
       try {
-        for (std::size_t i = 0; i < capacity_; ++i) {
-          slots_[i] = other.slots_[i];
+        for (const_iterator it = other.cbegin(); it != other.cend(); ++it) {
+          add(it->first, it->second);
         }
       } catch (...) {
-        delete[] slots_;
+        clear();
+        delete[] buckets_;
         throw;
       }
     }
 
     HashTable(HashTable< Key, Value, Hash, Equal >&& other) noexcept:
-      slots_(other.slots_),
-      capacity_(other.capacity_),
+      buckets_(other.buckets_),
+      bucketCount_(other.bucketCount_),
       size_(other.size_),
       hash_(other.hash_),
       equal_(other.equal_)
     {
-      other.slots_ = nullptr;
-      other.capacity_ = 0;
+      other.buckets_ = nullptr;
+      other.bucketCount_ = 0;
       other.size_ = 0;
     }
 
     ~HashTable()
     {
-      delete[] slots_;
+      if (buckets_ != nullptr) {
+        clear();
+        delete[] buckets_;
+      }
     }
 
     HashTable< Key, Value, Hash, Equal >& operator=(const HashTable< Key, Value, Hash, Equal >& other)
@@ -149,81 +151,109 @@ namespace samarin {
     HashTable< Key, Value, Hash, Equal >& operator=(HashTable< Key, Value, Hash, Equal >&& other) noexcept
     {
       if (this != std::addressof(other)) {
-        delete[] slots_;
-        slots_ = other.slots_;
-        capacity_ = other.capacity_;
-        size_ = other.size_;
-        other.slots_ = nullptr;
-        other.capacity_ = 0;
-        other.size_ = 0;
+        HashTable< Key, Value, Hash, Equal > tmp(std::move(other));
+        swap(tmp);
       }
       return *this;
     }
 
     Value& operator[](const Key& key)
     {
-      const std::size_t slot = findOrReserve(key);
-      return slots_[slot].data.second;
+      const std::size_t bucket = hash_(key) % bucketCount_;
+      for (Node * node = buckets_[bucket]; node != nullptr; node = node->next) {
+        if (equal_(node->data.first, key)) {
+          return node->data.second;
+        }
+      }
+      return prepend(bucket, key, Value())->data.second;
     }
 
     void add(const Key& key, const Value& value)
     {
-      const std::size_t slot = findOrReserve(key);
-      slots_[slot].data.second = value;
+      const std::size_t bucket = hash_(key) % bucketCount_;
+      for (Node * node = buckets_[bucket]; node != nullptr; node = node->next) {
+        if (equal_(node->data.first, key)) {
+          node->data.second = value;
+          return;
+        }
+      }
+      prepend(bucket, key, value);
     }
 
     Value& at(const Key& key)
     {
-      const std::size_t slot = locate(key);
-      if (slot == capacity_) {
+      Node * node = locate(key);
+      if (node == nullptr) {
         throw std::out_of_range("key is missing");
       }
-      return slots_[slot].data.second;
+      return node->data.second;
     }
 
     const Value& at(const Key& key) const
     {
-      const std::size_t slot = locate(key);
-      if (slot == capacity_) {
+      const Node * node = locate(key);
+      if (node == nullptr) {
         throw std::out_of_range("key is missing");
       }
-      return slots_[slot].data.second;
+      return node->data.second;
     }
 
     bool has(const Key& key) const
     {
-      return locate(key) != capacity_;
+      return locate(key) != nullptr;
     }
 
     const_iterator find(const Key& key) const
     {
-      return const_iterator(slots_, capacity_, locate(key));
+      const std::size_t bucket = hash_(key) % bucketCount_;
+      for (Node * node = buckets_[bucket]; node != nullptr; node = node->next) {
+        if (equal_(node->data.first, key)) {
+          return const_iterator(buckets_, bucketCount_, bucket, node);
+        }
+      }
+      return cend();
     }
 
     Value drop(const Key& key)
     {
-      const std::size_t slot = locate(key);
-      if (slot == capacity_) {
-        throw std::out_of_range("key is missing");
+      const std::size_t bucket = hash_(key) % bucketCount_;
+      Node * prev = nullptr;
+      Node * node = buckets_[bucket];
+      while (node != nullptr) {
+        if (equal_(node->data.first, key)) {
+          if (prev == nullptr) {
+            buckets_[bucket] = node->next;
+          } else {
+            prev->next = node->next;
+          }
+          Value value = std::move(node->data.second);
+          delete node;
+          --size_;
+          return value;
+        }
+        prev = node;
+        node = node->next;
       }
-      Value value = std::move(slots_[slot].data.second);
-      slots_[slot].state = detail::SlotState::deleted;
-      --size_;
-      return value;
+      throw std::out_of_range("key is missing");
     }
 
-    void rehash(std::size_t slots)
+    void rehash(std::size_t buckets)
     {
-      if (slots < size_) {
-        throw std::length_error("too few slots for rehash");
-      }
-      HashTable< Key, Value, Hash, Equal > rebuilt(slots);
-      for (std::size_t i = 0; i < capacity_; ++i) {
-        if (slots_[i].state == detail::SlotState::occupied) {
-          rebuilt.add(slots_[i].data.first, slots_[i].data.second);
+      const std::size_t newCount = atLeastMin(buckets);
+      Node ** newBuckets = new Node *[newCount]();
+      for (std::size_t b = 0; b < bucketCount_; ++b) {
+        Node * node = buckets_[b];
+        while (node != nullptr) {
+          Node * next = node->next;
+          const std::size_t target = hash_(node->data.first) % newCount;
+          node->next = newBuckets[target];
+          newBuckets[target] = node;
+          node = next;
         }
       }
-      swap(rebuilt);
+      delete[] buckets_;
+      buckets_ = newBuckets;
+      bucketCount_ = newCount;
     }
 
     std::size_t size() const
@@ -233,7 +263,7 @@ namespace samarin {
 
     std::size_t capacity() const
     {
-      return capacity_;
+      return bucketCount_;
     }
 
     bool empty() const
@@ -243,12 +273,18 @@ namespace samarin {
 
     const_iterator cbegin() const
     {
-      return const_iterator(slots_, capacity_, 0);
+      std::size_t bucket = 0;
+      const Node * node = bucketCount_ > 0 ? buckets_[0] : nullptr;
+      while (node == nullptr && bucket + 1 < bucketCount_) {
+        ++bucket;
+        node = buckets_[bucket];
+      }
+      return const_iterator(buckets_, bucketCount_, bucket, node);
     }
 
     const_iterator cend() const
     {
-      return const_iterator(slots_, capacity_, capacity_);
+      return const_iterator(buckets_, bucketCount_, bucketCount_, nullptr);
     }
 
     const_iterator begin() const
@@ -262,77 +298,62 @@ namespace samarin {
     }
 
   private:
-    static constexpr std::size_t min_capacity = 1;
-    static constexpr std::size_t default_capacity = 16;
+    using Node = detail::BucketNode< Key, Value >;
 
-    static std::size_t atLeastMin(std::size_t slots)
-    {
-      return slots < min_capacity ? min_capacity : slots;
-    }
+    static constexpr std::size_t min_bucket_count = 1;
+    static constexpr std::size_t default_bucket_count = 16;
 
-    detail::Entry< Key, Value >* slots_;
-    std::size_t capacity_;
+    Node ** buckets_;
+    std::size_t bucketCount_;
     std::size_t size_;
     Hash hash_;
     Equal equal_;
 
+    static std::size_t atLeastMin(std::size_t buckets)
+    {
+      return buckets < min_bucket_count ? min_bucket_count : buckets;
+    }
+
     void swap(HashTable< Key, Value, Hash, Equal >& other) noexcept
     {
-      std::swap(slots_, other.slots_);
-      std::swap(capacity_, other.capacity_);
+      std::swap(buckets_, other.buckets_);
+      std::swap(bucketCount_, other.bucketCount_);
       std::swap(size_, other.size_);
       std::swap(hash_, other.hash_);
       std::swap(equal_, other.equal_);
     }
 
-    std::size_t startIndex(const Key& key) const
+    Node * locate(const Key& key) const
     {
-      return hash_(key) % capacity_;
+      const std::size_t bucket = hash_(key) % bucketCount_;
+      for (Node * node = buckets_[bucket]; node != nullptr; node = node->next) {
+        if (equal_(node->data.first, key)) {
+          return node;
+        }
+      }
+      return nullptr;
     }
 
-    std::size_t locate(const Key& key) const
+    Node * prepend(std::size_t bucket, const Key& key, const Value& value)
     {
-      const std::size_t start = startIndex(key);
-      for (std::size_t i = 0; i < capacity_; ++i) {
-        const std::size_t idx = (start + i) % capacity_;
-        if (slots_[idx].state == detail::SlotState::empty) {
-          return capacity_;
-        }
-        if (slots_[idx].state == detail::SlotState::occupied && equal_(slots_[idx].data.first, key)) {
-          return idx;
-        }
-      }
-      return capacity_;
-    }
-
-    std::size_t findOrReserve(const Key& key)
-    {
-      const std::size_t start = startIndex(key);
-      std::size_t freeSlot = capacity_;
-      for (std::size_t i = 0; i < capacity_; ++i) {
-        const std::size_t idx = (start + i) % capacity_;
-        const detail::SlotState state = slots_[idx].state;
-        if (state == detail::SlotState::occupied) {
-          if (equal_(slots_[idx].data.first, key)) {
-            return idx;
-          }
-        } else {
-          if (freeSlot == capacity_) {
-            freeSlot = idx;
-          }
-          if (state == detail::SlotState::empty) {
-            break;
-          }
-        }
-      }
-      if (freeSlot == capacity_) {
-        throw std::length_error("hash table is full");
-      }
-      slots_[freeSlot].data.first = key;
-      slots_[freeSlot].data.second = Value();
-      slots_[freeSlot].state = detail::SlotState::occupied;
+      Node * node = new Node{ std::make_pair(key, value), buckets_[bucket] };
+      buckets_[bucket] = node;
       ++size_;
-      return freeSlot;
+      return node;
+    }
+
+    void clear()
+    {
+      for (std::size_t b = 0; b < bucketCount_; ++b) {
+        Node * node = buckets_[b];
+        while (node != nullptr) {
+          Node * next = node->next;
+          delete node;
+          node = next;
+        }
+        buckets_[b] = nullptr;
+      }
+      size_ = 0;
     }
   };
 
