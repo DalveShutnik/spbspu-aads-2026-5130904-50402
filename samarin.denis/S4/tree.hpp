@@ -183,6 +183,19 @@ namespace samarin {
       return *this;
     }
 
+    BSTree< Key, Value, Compare > & operator=(BSTree< Key, Value, Compare > && other) noexcept
+    {
+      if (this != std::addressof(other)) {
+        clear();
+        root_ = other.root_;
+        size_ = other.size_;
+        cmp_ = std::move(other.cmp_);
+        other.root_ = nullptr;
+        other.size_ = 0;
+      }
+      return *this;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
