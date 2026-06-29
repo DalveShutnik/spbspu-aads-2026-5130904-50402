@@ -338,6 +338,33 @@ namespace samarin {
       return rotateLeft(it);
     }
 
+    Value drop(const Key & key)
+    {
+      detail::TreeNode< Key, Value > * victim = findNode(key);
+      if (victim == nullptr) {
+        throw std::out_of_range("no such key");
+      }
+      if (victim->left == nullptr) {
+        transplant(victim, victim->right);
+      } else if (victim->right == nullptr) {
+        transplant(victim, victim->left);
+      } else {
+        detail::TreeNode< Key, Value > * heir = detail::leftmost(victim->right);
+        if (heir->parent != victim) {
+          transplant(heir, heir->right);
+          heir->right = victim->right;
+          heir->right->parent = heir;
+        }
+        transplant(victim, heir);
+        heir->left = victim->left;
+        heir->left->parent = heir;
+      }
+      Value value = std::move(victim->data.second);
+      delete victim;
+      --size_;
+      return value;
+    }
+
   private:
     detail::TreeNode< Key, Value > * root_;
     std::size_t size_;
