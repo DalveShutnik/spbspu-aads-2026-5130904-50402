@@ -211,7 +211,8 @@ namespace samarin {
           cur = cur->right;
           toLeft = false;
         } else {
-          cur->data.second = value;
+          Value replacement(value);
+          cur->data.second = std::move(replacement);
           return;
         }
       }
