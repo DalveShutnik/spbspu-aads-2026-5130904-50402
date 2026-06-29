@@ -415,7 +415,8 @@ namespace samarin {
       return const_cast< detail::TreeNode< Key, Value > * >(it.node_);
     }
 
-    void transplant(detail::TreeNode< Key, Value > * target, detail::TreeNode< Key, Value > * replacement)
+    void transplant(detail::TreeNode< Key, Value > * target,
+        detail::TreeNode< Key, Value > * replacement)
     {
       if (target->parent == nullptr) {
         root_ = replacement;
@@ -441,7 +442,8 @@ namespace samarin {
       if (node == nullptr) {
         return nullptr;
       }
-      detail::TreeNode< Key, Value > * fresh = new detail::TreeNode< Key, Value >{ node->data, nullptr, nullptr, parent };
+      detail::TreeNode< Key, Value > * fresh =
+          new detail::TreeNode< Key, Value >{ node->data, nullptr, nullptr, parent };
       try {
         fresh->left = clone(node->left, fresh);
         fresh->right = clone(node->right, fresh);
